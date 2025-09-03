@@ -1,58 +1,71 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { ToastProvider } from '@/components/ui/toast'
 
 interface CartItem {
-  id: string
-  name: string
-  price: number
+  productId: string
   quantity: number
-  image?: string
+  options?: Record<string, any>
 }
 
 interface CartContextType {
   items: CartItem[]
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void
-  removeFromCart: (id: string) => void
+  addToCart: (productId: string, quantity?: number) => void
+  removeFromCart: (productId: string) => void
   clearCart: () => void
   getTotalItems: () => number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function useCart() {
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider')
+  }
+  return context
+}
+
+interface ProvidersProps {
+  children: ReactNode
+}
+
+export function Providers({ children }: ProvidersProps) {
   const [items, setItems] = useState<CartItem[]>([])
 
+  // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
+    const savedCart = localStorage.getItem('tsena-cart')
     if (savedCart) {
-      setItems(JSON.parse(savedCart))
+      try {
+        setItems(JSON.parse(savedCart))
+      } catch (error) {
+        console.error('Error loading cart:', error)
+      }
     }
   }, [])
 
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items))
+    localStorage.setItem('tsena-cart', JSON.stringify(items))
   }, [items])
 
-  const addToCart = (newItem: Omit<CartItem, 'quantity'>) => {
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === newItem.id)
-      
+  const addToCart = (productId: string, quantity = 1) => {
+    setItems(prev => {
+      const existingItem = prev.find(item => item.productId === productId)
       if (existingItem) {
-        return currentItems.map(item =>
-          item.id === newItem.id
-            ? { ...item, quantity: item.quantity + 1 }
+        return prev.map(item =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       }
-      
-      return [...currentItems, { ...newItem, quantity: 1 }]
+      return [...prev, { productId, quantity }]
     })
   }
 
-  const removeFromCart = (id: string) => {
-    setItems(currentItems => currentItems.filter(item => item.id !== id))
+  const removeFromCart = (productId: string) => {
+    setItems(prev => prev.filter(item => item.productId !== productId))
   }
 
   const clearCart = () => {
@@ -64,24 +77,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ToastProvider>
-      <CartContext.Provider value={{
-        items,
-        addToCart,
-        removeFromCart,
-        clearCart,
-        getTotalItems
-      }}>
-        {children}
-      </CartContext.Provider>
-    </ToastProvider>
+    <CartContext.Provider value={{
+      items,
+      addToCart,
+      removeFromCart,
+      clearCart,
+      getTotalItems
+    }}>
+      {children}
+    </CartContext.Provider>
   )
 }
 
-export function useCart() {
-  const context = useContext(CartContext)
-  if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider')
-  }
-  return context
-}
+export { Providers }
