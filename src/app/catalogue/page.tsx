@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import ProductCard from '@/components/catalogue/product-card'
+import LoadingSpinner from '@/components/ui/loading-spinner'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
@@ -14,8 +15,14 @@ export default function CataloguePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<ProductFilter>({})
   const [showFilters, setShowFilters] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const filteredProducts = useMemo(() => {
+    setIsLoading(true)
+    
+    // Simulate loading for better UX
+    setTimeout(() => setIsLoading(false), 300)
+    
     return products.filter(product => {
       // Search term filter
       if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -224,11 +231,17 @@ export default function CataloguePage() {
         </motion.div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {filteredProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-16">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {filteredProducts.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))}
+          </div>
+        )}
 
         {filteredProducts.length === 0 && (
           <motion.div

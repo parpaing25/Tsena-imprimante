@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/select'
 import { validateMadagascarPhone } from '@/lib/utils'
 import { products, regions } from '@/data/products'
 import { motion } from 'framer-motion'
+import { useToast } from '@/components/ui/toast'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 
@@ -35,6 +36,7 @@ interface QuoteFormProps {
 export default function QuoteForm({ selectedProduct }: QuoteFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const { showToast } = useToast()
 
   const {
     register,
@@ -51,13 +53,27 @@ export default function QuoteForm({ selectedProduct }: QuoteFormProps) {
   const onSubmit = async (data: QuoteFormData) => {
     setIsSubmitting(true)
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    console.log('Quote form data:', data)
-    setIsSubmitted(true)
-    setIsSubmitting(false)
-    reset()
+    try {
+      // Simulate form submission
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      console.log('Quote form data:', data)
+      setIsSubmitted(true)
+      showToast({
+        type: 'success',
+        title: 'Demande envoyée !',
+        message: 'Nous vous contacterons dans les plus brefs délais.'
+      })
+      reset()
+    } catch (error) {
+      showToast({
+        type: 'error',
+        title: 'Erreur',
+        message: 'Une erreur est survenue. Veuillez réessayer.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubmitted) {

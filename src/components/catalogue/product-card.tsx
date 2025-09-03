@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/utils'
 import { Product } from '@/types/product'
 import { motion } from 'framer-motion'
-import { WifiIcon, PrinterIcon, DocumentDuplicateIcon, FaxIcon } from '@heroicons/react/24/outline'
+import { WifiIcon, PrinterIcon, DocumentDuplicateIcon, FaxIcon, HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
+import { useCart } from '@/components/providers'
+import { useToast } from '@/components/ui/toast'
 
 interface ProductCardProps {
   product: Product
@@ -14,6 +16,30 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const { addToCart } = useCart()
+  const { showToast } = useToast()
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    addToCart(product.id)
+    showToast({
+      type: 'success',
+      title: 'Produit ajouté',
+      message: `${product.name} a été ajouté à votre liste de souhaits`
+    })
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsFavorite(!isFavorite)
+    showToast({
+      type: isFavorite ? 'info' : 'success',
+      title: isFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris',
+      message: product.name
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -59,6 +85,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.inStock ? 'En stock' : 'Sur commande'}
           </span>
         </div>
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleToggleFavorite}
+          className="absolute bottom-3 right-3 p-2 bg-white/90 rounded-full shadow-md hover:bg-white transition-colors"
+        >
+          <HeartIcon className={`h-4 w-4 ${isFavorite ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
+        </button>
       </div>
       
       <div className="p-6">
@@ -118,10 +152,13 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               Détails
             </Link>
           </Button>
-          <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700" asChild>
-            <Link href={`/devis?product=${product.id}`}>
-              Devis
-            </Link>
+          <Button 
+            size="sm" 
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCartIcon className="h-4 w-4 mr-1" />
+            Ajouter
           </Button>
         </div>
       </div>

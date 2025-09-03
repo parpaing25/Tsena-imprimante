@@ -95,8 +95,8 @@ export default function PopularProducts() {
                     </Link>
                   </Button>
                   <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700" asChild>
-                    <Link href={`/devis?product=${product.id}`}>
-                      Devis
+                    <Link href={`/comparateur`}>
+                      Comparer
                     </Link>
                   </Button>
                 </div>
