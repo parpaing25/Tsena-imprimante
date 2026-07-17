@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,11 @@ const Conseils = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Conseils d'Experts - Bien choisir son imprimante | Tsena Imprimante</title>
+        <meta name="description" content="Guides et conseils d'experts pour choisir la bonne imprimante à Madagascar : EcoTank, laser, jet d'encre, coût par page, entretien et économies." />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/conseils" />
+      </Helmet>
       <Header />
       
       <main className="py-16">

@@ -35,6 +35,7 @@ const ImageLightbox = ({ imageUrl, alt, isOpen, onClose }: ImageLightboxProps) =
               variant="outline"
               size="sm"
               onClick={handleZoomOut}
+              aria-label="Dézoomer"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               <ZoomOut className="h-4 w-4" />
@@ -43,6 +44,7 @@ const ImageLightbox = ({ imageUrl, alt, isOpen, onClose }: ImageLightboxProps) =
               variant="outline"
               size="sm"
               onClick={resetZoom}
+              aria-label="Réinitialiser le zoom"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               {Math.round(zoom * 100)}%
@@ -51,6 +53,7 @@ const ImageLightbox = ({ imageUrl, alt, isOpen, onClose }: ImageLightboxProps) =
               variant="outline"
               size="sm"
               onClick={handleZoomIn}
+              aria-label="Zoomer"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               <ZoomIn className="h-4 w-4" />
@@ -59,6 +62,7 @@ const ImageLightbox = ({ imageUrl, alt, isOpen, onClose }: ImageLightboxProps) =
               variant="outline"
               size="sm"
               onClick={onClose}
+              aria-label="Fermer"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               <X className="h-4 w-4" />
@@ -79,7 +83,7 @@ const ImageLightbox = ({ imageUrl, alt, isOpen, onClose }: ImageLightboxProps) =
               className="max-w-none h-auto object-contain"
               style={{ maxHeight: '80vh' }}
               onError={(e) => {
-                e.currentTarget.src = "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500&h=400&fit=crop";
+                e.currentTarget.src = "/placeholder.svg";
               }}
             />
           </div>

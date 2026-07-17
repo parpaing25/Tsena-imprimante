@@ -26,8 +26,8 @@ import {
 } from "lucide-react";
 import { products, Product, formatPrice as formatProductPrice } from "@/data/products";
 import { deliveryRates, getDeliveryRate, calculateDeliveryPrice, formatPrice, DeliveryType, getDeliveryOptions } from "@/utils/deliveryRates";
-import { PDFGenerator, InvoiceData } from "@/utils/pdfGenerator";
-import jsPDF from 'jspdf';
+import type { InvoiceData } from "@/utils/pdfGenerator";
+import type jsPDF from 'jspdf';
 import { toast } from "sonner";
 
 interface SelectedProduct {
@@ -131,7 +131,7 @@ const ProformaQuoteForm = () => {
     return { subtotal, deliveryPrice, total, totalWeight, totalQuantity };
   }, [formData.selectedProducts, formData.region, formData.deliveryType, formData.distanceInTana]);
 
-  const generateProformaInvoice = () => {
+  const generateProformaInvoice = async () => {
     if (formData.selectedProducts.length === 0) {
       toast.error("Veuillez sélectionner au moins un produit");
       return;
@@ -146,6 +146,9 @@ const ProformaQuoteForm = () => {
       toast.error("Numéro de téléphone invalide");
       return;
     }
+
+    // Chargement à la volée de jsPDF (retiré du bundle initial)
+    const { PDFGenerator } = await import("@/utils/pdfGenerator");
 
     const invoiceData: InvoiceData = {
       quoteNumber: PDFGenerator.generateQuoteNumber(),
@@ -221,7 +224,7 @@ const ProformaQuoteForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    generateProformaInvoice();
+    await generateProformaInvoice();
   };
 
   const deliveryOptions = formData.region ? getDeliveryOptions(formData.region) : [];

@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,6 +104,11 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Blog Imprimantes - Actualités & Guides | Tsena Imprimante Madagascar</title>
+        <meta name="description" content="Articles, guides d'achat et actualités sur les imprimantes Canon, HP, Epson à Madagascar. Astuces, comparatifs et conseils de dépannage." />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/blog" />
+      </Helmet>
       <Header />
       
       <main className="py-16">

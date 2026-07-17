@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Phone, Mail, ArrowLeft } from "lucide-react";
@@ -14,6 +15,11 @@ const Terms = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Conditions Générales | Tsena Imprimante Madagascar</title>
+        <meta name="description" content="Conditions générales de vente et d'utilisation du site Tsena Imprimante Madagascar : commandes, livraison, garantie et paiement." />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/terms" />
+      </Helmet>
       <Header />
       
       <main className="py-16">

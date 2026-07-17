@@ -32,14 +32,15 @@ All colors MUST be HSL for perfect theming.
     --secondary: 210 25% 96%;
     --secondary-foreground: 210 22% 15%;
 
-    /* Accent: Energetic Orange */
-    --accent: 25 95% 55%;
+    /* Accent: Energetic Orange (darkened for WCAG AA text contrast, 4.6:1 on white) */
+    --accent: 25 95% 39%;
     --accent-foreground: 0 0% 100%;
     --accent-light: 25 95% 65%;
-    --accent-dark: 25 95% 45%;
+    --accent-dark: 25 95% 32%;
 
     --muted: 210 25% 96%;
-    --muted-foreground: 210 15% 55%;
+    /* Darkened for WCAG AA (5.2:1 on white) */
+    --muted-foreground: 210 15% 43%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;

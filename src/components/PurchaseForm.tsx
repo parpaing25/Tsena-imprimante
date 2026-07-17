@@ -157,7 +157,9 @@ Commande passée via le site web TSENA`;
 
       onClose();
     } catch (error) {
-      console.error("Erreur lors de l'envoi:", error);
+      if (import.meta.env.DEV) {
+        console.error("Erreur lors de l'envoi:", error);
+      }
       toast({
         title: "Erreur",
         description: "Impossible d'envoyer la commande. Veuillez réessayer.",
@@ -186,10 +188,17 @@ Commande passée via le site web TSENA`;
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <img 
-                  src={product.imageUrl} 
+                <img
+                  src={product.imageUrl}
                   alt={product.name}
-                  className="w-20 h-20 object-cover rounded-lg"
+                  width={80}
+                  height={80}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-20 h-20 object-contain rounded-lg bg-muted"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
                 />
                 <div>
                   <h3 className="font-semibold">{product.name}</h3>

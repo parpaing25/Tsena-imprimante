@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone, MessageCircle, Menu, X, Facebook, FileText } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import tsenaLogo from "@/assets/tsena-logo.png";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +38,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink-0">
             <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg overflow-hidden bg-white flex-shrink-0">
-              <img src="/lovable-uploads/d87be83d-c5c5-45b5-9c31-80ebeffe32a4.png" alt="Tsena Imprimante" className="h-6 w-6 sm:h-8 sm:w-8 object-contain" />
+              <img src="/logo.webp" alt="Tsena Imprimante" width="32" height="32" decoding="async" className="h-6 w-6 sm:h-8 sm:w-8 object-contain" />
             </div>
             <div className="hidden sm:block min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300">
@@ -88,8 +87,9 @@ const Header = () => {
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="lg:hidden h-8 w-8 p-0">
+                <Button variant="outline" size="sm" className="lg:hidden h-8 w-8 p-0" aria-label="Ouvrir le menu de navigation">
                   <Menu className="h-4 w-4" />
+                  <span className="sr-only">Ouvrir le menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">

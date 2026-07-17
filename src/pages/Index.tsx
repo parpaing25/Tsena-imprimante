@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ProductCatalog from "@/components/ProductCatalog";
@@ -22,18 +22,6 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  useEffect(() => {
-    // Update page title and meta description for SEO
-    document.title = "Tsena Imprimante Madagascar - Canon, HP, Epson | Livraison Province";
-    
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 
-        'Vente d\'imprimantes Canon, HP, Epson, Brother à Madagascar. Jet d\'encre, laser, EcoTank. Livraison province, installation gratuite Tana. Devis gratuit ☎ 033 71 063 34'
-      );
-    }
-  }, []);
-
   const handleCall = () => {
     window.location.href = "tel:+261337106334";
   };
@@ -85,6 +73,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Tsena Imprimante Madagascar - Canon, HP, Epson | Livraison Province</title>
+        <meta name="description" content="Vente d'imprimantes Canon, HP, Epson, Brother à Madagascar. Jet d'encre, laser, EcoTank. Livraison province, installation gratuite Tana. Devis gratuit ☎ 033 71 063 34" />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/" />
+      </Helmet>
       <Header />
       <main>
         <HeroSection />

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Phone, Eye, FileText, MessageCircle, Zap } from "lucide-react";
-import heroImage from "@/assets/hero-banner.jpg";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useState, useEffect } from "react";
 import { products } from "@/data/products";
@@ -39,8 +38,8 @@ const HeroSection = () => {
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/70 z-20"></div>
         <div className="relative h-full">
-          {featuredProducts.map((product, index) => <div key={product.id} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-30' : 'opacity-0'}`}>
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+          {featuredProducts.map((product, index) => <div key={product.id} aria-hidden="true" className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-30' : 'opacity-0'}`}>
+              <img src={product.imageUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" className="w-full h-full object-cover" />
             </div>)}
         </div>
       </div>
@@ -124,16 +123,21 @@ const HeroSection = () => {
               
               <Carousel className="w-full">
                 <CarouselContent>
-                  {featuredProducts.map(product => <CarouselItem key={product.id}>
+                  {featuredProducts.map((product, index) => <CarouselItem key={product.id}>
                       <div className="flex flex-col items-center text-center text-white p-2 space-y-3">
                         <div className="relative group">
-                          <img 
-                            src={product.imageUrl} 
-                            alt={product.name} 
-                            className="w-64 h-36 sm:w-68 sm:h-40 object-contain rounded-3xl mb-3 shadow-xl hover-lift transition-all duration-300 group-hover:scale-105 cursor-pointer" 
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            width={272}
+                            height={160}
+                            loading={index === 0 ? "eager" : "lazy"}
+                            decoding="async"
+                            {...(index === 0 ? { fetchpriority: "high" } : {})}
+                            className="w-64 h-36 sm:w-68 sm:h-40 object-contain rounded-3xl mb-3 shadow-xl hover-lift transition-all duration-300 group-hover:scale-105 cursor-pointer"
                             onClick={() => handleImageClick(product.imageUrl, product.name)}
                             onError={e => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500&h=400&fit=crop";
+                        e.currentTarget.src = "/placeholder.svg";
                       }} />
                           <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs px-1.5 py-0.5 rounded-full font-bold animate-bounce-in">
                             TOP
@@ -194,23 +198,23 @@ const HeroSection = () => {
 
 
       {/* Enhanced Floating Animation Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
-      <div className="absolute bottom-20 right-10 w-16 h-16 bg-accent/20 rounded-full animate-float" style={{
+      <div aria-hidden="true" className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
+      <div aria-hidden="true" className="absolute bottom-20 right-10 w-16 h-16 bg-accent/20 rounded-full animate-float" style={{
       animationDelay: '2s'
     }}></div>
-      <div className="absolute top-1/2 right-20 w-12 h-12 bg-white/5 rounded-full animate-float" style={{
+      <div aria-hidden="true" className="absolute top-1/2 right-20 w-12 h-12 bg-white/5 rounded-full animate-float" style={{
       animationDelay: '4s'
     }}></div>
-      <div className="absolute top-32 right-32 w-8 h-8 bg-success/20 rounded-full animate-float" style={{
+      <div aria-hidden="true" className="absolute top-32 right-32 w-8 h-8 bg-success/20 rounded-full animate-float" style={{
       animationDelay: '1s'
     }}></div>
-      <div className="absolute bottom-32 left-32 w-14 h-14 bg-primary/10 rounded-full animate-float" style={{
+      <div aria-hidden="true" className="absolute bottom-32 left-32 w-14 h-14 bg-primary/10 rounded-full animate-float" style={{
       animationDelay: '3s'
     }}></div>
-      
+
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
-        {featuredProducts.map((_, index) => <button key={index} onClick={() => setCurrentSlide(index)} className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/30'}`} />)}
+        {featuredProducts.map((_, index) => <button key={index} onClick={() => setCurrentSlide(index)} aria-label={`Afficher l'imprimante ${index + 1} sur ${featuredProducts.length}`} className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/30'}`} />)}
       </div>
 
       {/* Image Lightbox */}

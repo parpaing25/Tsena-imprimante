@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,11 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>FAQ - Questions Fréquentes | Tsena Imprimante Madagascar</title>
+        <meta name="description" content="Réponses aux questions fréquentes sur l'achat, la livraison, la garantie et l'installation d'imprimantes Canon, HP, Epson à Madagascar." />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/faq" />
+      </Helmet>
       <Header />
       
       <main className="py-16">

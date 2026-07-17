@@ -134,10 +134,14 @@ const ProductDetailModal = ({ product, isOpen, onClose, onRequestQuote }: Produc
               <img
                 src={product.imageUrl}
                 alt={product.name}
+                width={500}
+                height={320}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-80 object-contain rounded-lg bg-muted cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={handleImageClick}
                 onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=500&h=400&fit=crop";
+                  e.currentTarget.src = "/placeholder.svg";
                 }}
               />
               <div className="absolute top-2 left-2 flex gap-1">

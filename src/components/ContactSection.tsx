@@ -356,12 +356,12 @@ Envoyé depuis tsenaimprimante.com`;
                       <div className="text-muted-foreground">1 an constructeur + support gratuit</div>
                     </div>
                   </div>
-                  <a href="/faq" className="inline-block w-full mt-4">
-                    <Button variant="outline" className="w-full hover-scale" size="sm">
+                  <Button asChild variant="outline" className="w-full hover-scale mt-4" size="sm">
+                    <a href="/faq">
                       <HelpCircle className="h-4 w-4 mr-2" />
                       Voir toutes les FAQ
-                    </Button>
-                  </a>
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             </AnimatedSection>

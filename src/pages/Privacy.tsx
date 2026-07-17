@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Phone, Mail, ArrowLeft } from "lucide-react";
@@ -14,6 +15,11 @@ const Privacy = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Politique de Confidentialité | Tsena Imprimante Madagascar</title>
+        <meta name="description" content="Politique de confidentialité de Tsena Imprimante : comment nous collectons, utilisons et protégeons vos données personnelles à Madagascar." />
+        <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/privacy" />
+      </Helmet>
       <Header />
       
       <main className="py-16">

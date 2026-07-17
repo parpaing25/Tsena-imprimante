@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -653,8 +654,13 @@ const ArticleDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{`${article.title} | Blog Tsena Imprimante Madagascar`}</title>
+        <meta name="description" content={article.excerpt} />
+        <link rel="canonical" href={`https://tsenaimprimante.fonenako.mg/blog/${id}`} />
+      </Helmet>
       <Header />
-      
+
       <main className="py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Navigation */}
