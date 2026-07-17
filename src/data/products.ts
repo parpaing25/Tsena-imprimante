@@ -1,347 +1,389 @@
-import { Product } from '@/types/product'
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  model: string;
+  type: 'inkjet' | 'laser' | 'tank';
+  category: 'multifunction' | 'printer';
+  priceMin: number;
+  priceMax?: number;
+  currency: string;
+  features: string[];
+  isMultifunction: boolean;
+  hasWifi: boolean;
+  hasADF: boolean;
+  hasDuplex: boolean;
+  colorPrint: boolean;
+  formats: string[];
+  monthlyVolume: string;
+  description: string;
+  imageUrl: string;
+  inStock: boolean;
+  isPopular?: boolean;
+  kitIncluded?: boolean;
+  weight: number; // Poids en kg
+}
 
 export const products: Product[] = [
   {
-    id: 'canon-pixma-g2470',
-    name: 'Canon PIXMA G2470',
-    brand: 'Canon',
-    model: 'G2470',
-    type: 'tank',
-    category: 'multifunction',
-    price: {
-      base: 860000
-    },
-    features: {
-      color: true,
-      wifi: false,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: true
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '8.8 ipm',
-        color: '5.0 ipm'
-      },
-      resolution: '4800 x 1200 dpi',
-      connectivity: ['USB'],
-      paperCapacity: '100 feuilles',
-      dimensions: '445 x 330 x 163 mm',
-      weight: '5.9 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante multifonction avec système de réservoir d\'encre intégré. Idéale pour un usage domestique et de bureau avec des coûts d\'impression très réduits.',
-    idealFor: ['Usage domestique', 'Petits bureaux', 'Étudiants', 'Impression économique'],
-    inStock: true
+    id: "canon-g2470",
+    name: "Canon PIXMA G2470",
+    brand: "Canon",
+    model: "G2470",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 860000,
+    currency: "MGA",
+    features: ["Système EcoTank rechargeable", "Scanner", "Copieur", "Très économique", "Rendement élevé"],
+    isMultifunction: true,
+    hasWifi: false,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "6000-7700 pages",
+    description: "Imprimante multifonction avec système EcoTank rechargeable. Vitesse: 11 ipm N&B, 6 ipm couleur. Capacité: 100 feuilles. Interface USB. Rendement jusqu'à 6000 pages noir et 7700 pages couleur avec bouteilles fournies. Écran LCD 1.2 pouces. Encre GI-41. Compatible Windows 11, macOS 12, Chrome OS.",
+    imageUrl: "/lovable-uploads/6f0e4932-b660-48c6-be93-04076f89e98a.png",
+    inStock: true,
+    isPopular: true,
+    weight: 5.8
   },
   {
-    id: 'canon-pixma-g3410',
-    name: 'Canon PIXMA G3410',
-    brand: 'Canon',
-    model: 'G3410',
-    type: 'tank',
-    category: 'multifunction',
-    price: {
-      base: 850000
-    },
-    features: {
-      color: true,
-      wifi: true,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: true
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '8.8 ipm',
-        color: '5.0 ipm'
-      },
-      resolution: '4800 x 1200 dpi',
-      connectivity: ['USB', 'Wi-Fi'],
-      paperCapacity: '100 feuilles',
-      dimensions: '445 x 330 x 163 mm',
-      weight: '5.9 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante multifonction avec Wi-Fi et système de réservoir. Parfaite pour l\'impression mobile et le partage en réseau.',
-    idealFor: ['Bureaux connectés', 'Impression mobile', 'Partage familial', 'Télétravail'],
-    inStock: true
+    id: "canon-g3410",
+    name: "Canon PIXMA G3410",
+    brand: "Canon",
+    model: "G3410",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 850000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Système EcoTank", "Scanner", "PIXMA Cloud Link", "Impression mobile"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo sans marge"],
+    monthlyVolume: "6000-7000 pages",
+    description: "Imprimante Wi-Fi avec système EcoTank. Vitesse: 8.8 ipm N&B, 5 ipm couleur. Capacité: 100 feuilles. Interface Wi-Fi, USB, PIXMA Cloud Link. Rendement 6000 pages noir, 7000 couleur. Écran LCD 1.2 pouces. Encre hybride pour documents nets et photos éclatantes. Application Canon PRINT.",
+    imageUrl: "/lovable-uploads/925f7a68-7686-47c6-8d2a-1cc5ceec6acd.png",
+    inStock: true,
+    isPopular: true,
+    weight: 5.2
   },
   {
-    id: 'canon-isensys-mf3010',
-    name: 'Canon i-SENSYS MF3010',
-    brand: 'Canon',
-    model: 'MF3010',
-    type: 'laser',
-    category: 'multifunction',
-    price: {
-      base: 1530000
-    },
-    features: {
-      color: false,
-      wifi: false,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: false
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '18 ppm'
-      },
-      resolution: '1200 x 600 dpi',
-      connectivity: ['USB'],
-      paperCapacity: '150 feuilles',
-      dimensions: '390 x 364 x 272 mm',
-      weight: '11.7 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg',
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg'
-      ]
-    },
-    description: 'Imprimante laser monochrome multifonction. Robuste et rapide, idéale pour les gros volumes de documents.',
-    idealFor: ['Bureaux professionnels', 'Gros volumes', 'Documents officiels', 'Impression rapide'],
-    inStock: true
+    id: "canon-mf3010",
+    name: "Canon i-SENSYS MF3010",
+    brand: "Canon",
+    model: "MF3010",
+    type: "laser",
+    category: "multifunction",
+    priceMin: 1530000,
+    currency: "MGA",
+    features: ["Laser Monochrome", "Scanner", "Copieur", "18 ppm", "Professionnel"],
+    isMultifunction: true,
+    hasWifi: false,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: false,
+    formats: ["A4", "Letter", "Legal"],
+    monthlyVolume: "1600 pages/mois",
+    description: "Imprimante laser monochrome multifonction professionnelle. Vitesse: 18 ppm. Résolution 1200x600 dpi. Première impression: 7.8 sec. Capacité: 150 feuilles entrée, 100 sortie. Interface USB 2.0. Écran LED. Cartouche 725 (1600 pages). Compatible Windows, Mac, Linux. Idéale bureaux et PME.",
+    imageUrl: "/lovable-uploads/be8fe79d-42d7-412c-b505-a4d7a90964b7.png",
+    inStock: true,
+    weight: 15.2
   },
   {
-    id: 'canon-mg2545s',
-    name: 'Canon PIXMA MG2545S',
-    brand: 'Canon',
-    model: 'MG2545S',
-    type: 'inkjet',
-    category: 'multifunction',
-    price: {
-      base: 340000,
-      withKit: 410000
-    },
-    features: {
-      color: true,
-      wifi: false,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: false
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '8.0 ipm',
-        color: '4.0 ipm'
-      },
-      resolution: '4800 x 600 dpi',
-      connectivity: ['USB'],
-      paperCapacity: '60 feuilles',
-      dimensions: '426 x 306 x 145 mm',
-      weight: '3.5 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante multifonction compacte et abordable. Parfaite pour débuter avec une solution complète.',
-    idealFor: ['Débutants', 'Usage occasionnel', 'Petits espaces', 'Budget serré'],
-    inStock: true
+    id: "canon-mg2545s",
+    name: "Canon PIXMA MG2545S",
+    brand: "Canon",
+    model: "MG2545S",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 410000,
+    priceMax: 410000,
+    currency: "MGA",
+    features: ["Scanner", "Copieur", "Compact", "Abordable", "Papier photo 200g/m²"],
+    isMultifunction: true,
+    hasWifi: false,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "100-300 pages",
+    description: "Imprimante multifonction d'entrée de gamme. Capacité: 70 feuilles papier ordinaire + 20 feuilles photo. Papier photo jusqu'à 200g/m². Interface USB haute vitesse. Dimensions: 426×306×145mm, 3.5kg. Parfaite pour usage domestique occasionnel. Prix: 410,000 MGA.",
+    imageUrl: "/lovable-uploads/22d2190c-c4a0-4b6b-8619-a374bdf9604d.png",
+    inStock: true,
+    kitIncluded: false,
+    weight: 3.5
   },
   {
-    id: 'canon-tr4640',
-    name: 'Canon PIXMA TR4640',
-    brand: 'Canon',
-    model: 'TR4640',
-    type: 'inkjet',
-    category: 'multifunction',
-    price: {
-      base: 500000,
-      withKit: 590000
-    },
-    features: {
-      color: true,
-      wifi: true,
-      adf: true,
-      duplex: true,
-      fax: true,
-      maxFormat: 'A4',
-      tankSystem: false
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '8.8 ipm',
-        color: '4.4 ipm'
-      },
-      resolution: '4800 x 1200 dpi',
-      connectivity: ['USB', 'Wi-Fi'],
-      paperCapacity: '100 feuilles',
-      dimensions: '435 x 316 x 187 mm',
-      weight: '6.6 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante multifonction complète avec Wi-Fi, ADF, duplex et fax. Solution professionnelle pour les bureaux.',
-    idealFor: ['Bureaux professionnels', 'PME', 'Impression recto-verso', 'Fax intégré'],
-    inStock: true
+    id: "canon-tr4640",
+    name: "Canon PIXMA TR4640",
+    brand: "Canon",
+    model: "TR4640",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 520000,
+    priceMax: 590000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Fax", "ADF", "Recto-verso auto", "Cloud Link", "Écran LCD Full Dot"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: true,
+    hasDuplex: true,
+    colorPrint: true,
+    formats: ["A4", "Photo", "Legal"],
+    monthlyVolume: "500-1000 pages",
+    description: "Solution bureau complète avec Wi-Fi, fax, impression recto-verso automatique. Capacité: 100 feuilles papier + 20 photo. Interface Wi-Fi, USB, PIXMA Cloud Link. Écran LCD Full Dot. Dimensions: 435×295×189mm, 5.9kg. Sans kit: 520,000 MGA, avec kit: 590,000 MGA. Idéale petites entreprises.",
+    imageUrl: "/lovable-uploads/7a860bdf-62ea-4c69-8a97-bfe0e02cb5c6.png",
+    inStock: true,
+    kitIncluded: false,
+    weight: 5.9
   },
   {
-    id: 'hp-deskjet-2720',
-    name: 'HP DeskJet 2720',
-    brand: 'HP',
-    model: '2720',
-    type: 'inkjet',
-    category: 'multifunction',
-    price: {
-      base: 380000,
-      withKit: 450000
-    },
-    features: {
-      color: true,
-      wifi: true,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: false
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '7.5 ppm',
-        color: '5.5 ppm'
-      },
-      resolution: '4800 x 1200 dpi',
-      connectivity: ['USB', 'Wi-Fi'],
-      paperCapacity: '60 feuilles',
-      dimensions: '425 x 304 x 155 mm',
-      weight: '3.42 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante HP compacte avec Wi-Fi intégré. Idéale pour l\'impression mobile et les petits espaces.',
-    idealFor: ['Usage domestique', 'Impression mobile', 'Étudiants', 'Petits bureaux'],
-    inStock: true
+    id: "canon-ts3440",
+    name: "Canon PIXMA TS3440",
+    brand: "Canon",
+    model: "TS3440",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 420000,
+    priceMax: 490000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Scanner", "Copieur", "Fax", "Cloud Link", "Écran LCD 3.8cm"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "200-400 pages",
+    description: "Imprimante Wi-Fi multifonction avec impression sans marge et copie sans bordure. Écran LCD monochrome 3.8cm. Capacité: 100 feuilles papier + 20 photo (jusqu'à 250g/m²). Interface Wi-Fi, USB, PIXMA Cloud Link. Dimensions: 435×327×145mm, 4kg. Sans kit: 420,000 MGA, avec kit: 490,000 MGA.",
+    imageUrl: "/lovable-uploads/743838c9-3729-44d9-9766-7787029a5680.png",
+    inStock: true,
+    kitIncluded: false,
+    isPopular: true,
+    weight: 4.0
   },
   {
-    id: 'epson-ecotank-l3250',
-    name: 'Epson EcoTank L3250',
-    brand: 'Epson',
-    model: 'L3250',
-    type: 'tank',
-    category: 'multifunction',
-    price: {
-      base: 920000
-    },
-    features: {
-      color: true,
-      wifi: true,
-      adf: false,
-      duplex: false,
-      maxFormat: 'A4',
-      tankSystem: true
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '10.0 ipm',
-        color: '5.0 ipm'
-      },
-      resolution: '5760 x 1440 dpi',
-      connectivity: ['USB', 'Wi-Fi'],
-      paperCapacity: '100 feuilles',
-      dimensions: '375 x 347 x 179 mm',
-      weight: '4.5 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante Epson EcoTank avec réservoirs d\'encre haute capacité. Coût par page ultra-réduit.',
-    idealFor: ['Gros volumes', 'Économies d\'encre', 'Bureaux', 'Écoles'],
-    inStock: true
+    id: "canon-ts3640",
+    name: "Canon PIXMA TS3640",
+    brand: "Canon",
+    model: "TS3640",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 490000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Scanner", "Copieur", "Kit inclus", "Apple AirPrint", "Mopria"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo 13×18cm"],
+    monthlyVolume: "200-400 pages",
+    description: "Imprimante Wi-Fi avec kit externe inclus. Vitesse: 7.7 ipm N&B, 4 ipm couleur. Impression sans marge 13×18cm. Capacité: 60 feuilles. Wi-Fi, USB, Canon PRINT, Apple AirPrint, Mopria. Écran LCD 3.7cm. Dimensions: 435×327×145mm, 4kg. Compatible Windows, macOS, iOS, Android. Prix: 490,000 MGA. Idéale usage domestique/scolaire.",
+    imageUrl: "/lovable-uploads/67e1ced0-23b3-4669-81ae-64a6799ca9f5.png",
+    inStock: true,
+    kitIncluded: true,
+    isPopular: true,
+    weight: 4.0
+  },
+  // Nouveaux produits PROMOTION
+  {
+    id: "canon-ts9540",
+    name: "Canon PIXMA TS9540",
+    brand: "Canon",
+    model: "TS9540",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 1550000,
+    priceMax: 1700000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Format A3", "5 couleurs", "Scanner A3", "Écran tactile LCD", "Impression bristols 30×30cm", "Autocollants ongles"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: true,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A3", "A4", "Photo", "Bristols 30×30cm"],
+    monthlyVolume: "500-1000 pages",
+    description: "Imprimante A3 multifonction 5 couleurs avec Wi-Fi. Impression, copie, scan format A3. Impression sans marge et copie sans bordure. Écran LCD tactile. Capacité: 100 feuilles papier + 20 photo. Design moderne. CAD 20 feuilles. Compatible bristols 30×30cm et autocollants imprimables pour ongles. Sans kit: 1,550,000 MGA, avec kit: 1,700,000 MGA.",
+    imageUrl: "/lovable-uploads/fba45568-a4cf-4956-82e8-1db0dbebeeac.png",
+    inStock: true,
+    kitIncluded: false,
+    isPopular: true,
+    weight: 8.5
   },
   {
-    id: 'brother-dcp-t720dw',
-    name: 'Brother DCP-T720DW',
-    brand: 'Brother',
-    model: 'DCP-T720DW',
-    type: 'tank',
-    category: 'multifunction',
-    price: {
-      base: 780000
-    },
-    features: {
-      color: true,
-      wifi: true,
-      adf: false,
-      duplex: true,
-      maxFormat: 'A4',
-      tankSystem: true
-    },
-    specifications: {
-      printSpeed: {
-        blackWhite: '16 ppm',
-        color: '9 ppm'
-      },
-      resolution: '6000 x 1200 dpi',
-      connectivity: ['USB', 'Wi-Fi'],
-      paperCapacity: '150 feuilles',
-      dimensions: '435 x 374 x 193 mm',
-      weight: '8.6 kg'
-    },
-    images: {
-      main: 'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-      gallery: [
-        'https://images.pexels.com/photos/4792509/pexels-photo-4792509.jpeg',
-        'https://images.pexels.com/photos/4792728/pexels-photo-4792728.jpeg'
-      ]
-    },
-    description: 'Imprimante Brother avec réservoirs d\'encre et impression recto-verso automatique. Robuste et économique.',
-    idealFor: ['Bureaux moyens', 'Impression recto-verso', 'Durabilité', 'Coût réduit'],
-    inStock: true
+    id: "canon-mg3640s",
+    name: "Canon PIXMA MG3640s",
+    brand: "Canon",
+    model: "MG3640s",
+    type: "inkjet",
+    category: "multifunction",
+    priceMin: 490000,
+    priceMax: 560000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Scanner", "Copieur", "Fax", "Cloud Link", "Recto-verso auto"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: true,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "300-500 pages",
+    description: "Imprimante Wi-Fi multifonction avec impression recto-verso automatique. Impression sans marge et copie sans bordure. Capacité: 100 feuilles papier + 20 photo. Interface Wi-Fi, USB, PIXMA Cloud Link. Dimensions: 449×304×152mm, 5.4kg. Sans kit: 490,000 MGA, avec kit: 560,000 MGA.",
+    imageUrl: "/lovable-uploads/1c0fe0a4-662e-4c19-a691-7a5ea5c35acd.png",
+    inStock: true,
+    kitIncluded: false,
+    weight: 5.4
+  },
+  {
+    id: "epson-l4260",
+    name: "Epson EcoTank L4260",
+    brand: "Epson",
+    model: "L4260",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 1535000,
+    currency: "MGA",
+    features: ["Wi-Fi", "EcoTank", "Impression photos pro", "EcoTank façade", "3 ans d'impression"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "14000-5200 pages",
+    description: "Imprimante EcoTank Wi-Fi pour impression photos professionnelle. Système EcoTank simple avec bouteilles à détrompeurs et réservoirs en façade. Volume fourni: 14,000 pages monochrome et 5,200 couleur (3 ans d'impression). Impression sans marge et copie sans bordure. Capacité: 100 feuilles + 20 photo.",
+    imageUrl: "/lovable-uploads/4c9867c4-8f58-4012-a49f-c865e5379c0e.png",
+    inStock: true,
+    isPopular: true,
+    weight: 4.5
+  },
+  {
+    id: "epson-l6290",
+    name: "Epson EcoTank L6290",
+    brand: "Epson",
+    model: "L6290",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 2460000,
+    currency: "MGA",
+    features: ["Wi-Fi", "EcoTank", "Impression photos pro", "EcoTank façade", "3 ans d'impression", "Format A3+"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A3+", "A4", "Photo"],
+    monthlyVolume: "14000-5200 pages",
+    description: "Imprimante EcoTank Wi-Fi format A3+ pour impression photos professionnelle. Système EcoTank avec bouteilles à détrompeurs. Volume fourni: 14,000 pages monochrome et 5,200 couleur (3 ans d'impression). Impression et photocopie, scan, Wi-Fi. Capacité: 100 feuilles + 20 photo.",
+    imageUrl: "/lovable-uploads/a7970c7c-c39e-4dd0-bc21-426e30d947a3.png",
+    inStock: true,
+    isPopular: true,
+    weight: 8.9
+  },
+  {
+    id: "hp-smart-tank-515",
+    name: "HP Smart Tank 515",
+    brand: "HP",
+    model: "Smart Tank 515",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 1060000,
+    currency: "MGA",
+    features: ["Wi-Fi", "Smart Tank", "Impression photos pro", "Sans bordure 8.5×11 pouces"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo", "8.5×11 pouces"],
+    monthlyVolume: "500-800 pages",
+    description: "Imprimante HP Smart Tank Wi-Fi pour impression photos professionnelle. Impression sans marge et copie sans bordure. Impression sans bordure jusqu'à 8.5×11 pouces (210×297mm). Capacité: 100 feuilles + 20 photo. Interface Wi-Fi, USB haute vitesse. Prix avec kit externe: 1,060,000 MGA.",
+    imageUrl: "/lovable-uploads/0c2507fc-a3d1-4337-b83e-89a06ccdb7aa.png",
+    inStock: true,
+    kitIncluded: true,
+    weight: 4.8
+  },
+  {
+    id: "epson-l3260",
+    name: "Epson EcoTank L3260",
+    brand: "Epson",
+    model: "L3260",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 1270000,
+    currency: "MGA",
+    features: ["Wi-Fi", "EcoTank", "Scanner", "Copieur", "Écran LCD couleur", "Recto-verso"],
+    isMultifunction: true,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: true,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "500-800 pages",
+    description: "Imprimante EcoTank multifonction Wi-Fi. Impression, copie, scan. Vitesse: 15 ppm couleur, 33 ppm monochrome, 69 sec/photo 10×15cm. Recto-verso automatique. Écran LCD couleur 3.7cm. Capacité: 100 feuilles. Interface USB, Wi-Fi. Dimensions: 375×347×179mm, 4kg.",
+    imageUrl: "/lovable-uploads/87f8cff4-831e-48c6-9761-5855c4eca2b1.png",
+    inStock: true,
+    isPopular: true,
+    weight: 4.0
+  },
+  {
+    id: "epson-l805",
+    name: "Epson EcoTank L805",
+    brand: "Epson",
+    model: "L805",
+    type: "tank",
+    category: "printer",
+    priceMin: 1800000,
+    currency: "MGA",
+    features: ["Wi-Fi", "EcoTank", "Spécial Photos", "Impression CD/DVD", "Photos professionnelles"],
+    isMultifunction: false,
+    hasWifi: true,
+    hasADF: false,
+    hasDuplex: false,
+    colorPrint: true,
+    formats: ["A4", "Photo", "CD/DVD"],
+    monthlyVolume: "300-500 pages",
+    description: "Imprimante EcoTank spécialisée photos avec Wi-Fi. Impression photos professionnelles et impression directe sur CD/DVD. Impression sans marge et copie sans bordure. Capacité: 100 feuilles + 20 photo. Interface Wi-Fi, USB. Dimensions: 435×295×189mm, 5.9kg. Prix avec kit externe: 1,800,000 MGA.",
+    imageUrl: "/lovable-uploads/eca1bc2d-cf8d-48ab-a47f-968f67ccfebd.png",
+    inStock: true,
+    kitIncluded: true,
+    isPopular: true,
+    weight: 5.9
+  },
+  {
+    id: "epson-l3211",
+    name: "Epson EcoTank L3211",
+    brand: "Epson",
+    model: "L3211",
+    type: "tank",
+    category: "multifunction",
+    priceMin: 1050000,
+    currency: "MGA",
+    features: ["EcoTank", "Scanner", "Copieur", "Recto-verso", "Économique"],
+    isMultifunction: true,
+    hasWifi: false,
+    hasADF: false,
+    hasDuplex: true,
+    colorPrint: true,
+    formats: ["A4", "Photo"],
+    monthlyVolume: "400-600 pages",
+    description: "Imprimante EcoTank multifonction économique. Impression, copie, scan. Vitesse: 15 ppm couleur, 33 ppm monochrome, 27 sec/photo 10×15cm. Recto-verso automatique. Capacité: 100 feuilles. Interface USB haute vitesse. Dimensions: 375×347×179mm, 3.9kg.",
+    imageUrl: "/lovable-uploads/cce8915c-fa54-41d9-b227-3123ea307eeb.png",
+    inStock: true,
+    weight: 3.9
   }
-]
+];
 
-export const brands = ['Canon', 'HP', 'Epson', 'Brother']
-export const types = [
-  { value: 'inkjet', label: 'Jet d\'encre' },
-  { value: 'laser', label: 'Laser' },
-  { value: 'tank', label: 'Réservoir d\'encre' }
-]
+export const formatPrice = (price: number, currency: string = "MGA") => {
+  return new Intl.NumberFormat('fr-FR').format(price).replace(/\s/g, '.').replace(/\//g, '.') + " " + currency;
+};
 
-export const regions = [
-  'Antananarivo',
-  'Antsirabe',
-  'Fianarantsoa',
-  'Toamasina',
-  'Mahajanga',
-  'Toliara',
-  'Antsiranana',
-  'Morondava',
-  'Sambava',
-  'Fort-Dauphin'
-]
+export const getPopularProducts = () => products.filter(p => p.isPopular);
+export const getProductsByType = (type: Product['type']) => products.filter(p => p.type === type);
+export const getProductsByBrand = (brand: string) => products.filter(p => p.brand === brand);

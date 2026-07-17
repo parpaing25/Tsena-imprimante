@@ -1,0 +1,14 @@
+---
+deployment:
+  tasks:
+    # chemins
+    - export APPDIR=/home/reti9202/repositories/tsena-imprimante-mg
+    - export DEPLOYPATH=/home/reti9202/Tsenaimprimante.artimmomada.com/
+
+    # build (Node 20 chez o2switch ; si ça échoue, essaie alt-nodejs22)
+    - cd $APPDIR
+    - /opt/alt/alt-nodejs20/root/usr/bin/npm ci || /opt/alt/alt-nodejs20/root/usr/bin/npm install
+    - /opt/alt/alt-nodejs20/root/usr/bin/npm run build
+
+    # déploiement du build Vite -> dist/
+    - /usr/bin/rsync -a --delete $APPDIR/dist/ $DEPLOYPATH
