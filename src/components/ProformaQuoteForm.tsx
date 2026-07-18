@@ -310,7 +310,7 @@ const ProformaQuoteForm = () => {
                     <Select value={formData.region} onValueChange={(value) => 
                       setFormData(prev => ({ ...prev, region: value }))
                     }>
-                      <SelectTrigger>
+                      <SelectTrigger id="region" aria-label="Sélectionner votre région ou ville de livraison">
                         <SelectValue placeholder="Sélectionnez" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border shadow-md z-50">
@@ -411,6 +411,7 @@ const ProformaQuoteForm = () => {
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => toggleProductSelection(product)}
+                                aria-label={`Sélectionner ${product.name} pour le devis`}
                               />
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-medium text-sm truncate">{product.name}</h4>

@@ -1,10 +1,8 @@
 import { Helmet } from "react-helmet-async";
+import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ProductCatalog from "@/components/ProductCatalog";
-import ContactSection from "@/components/ContactSection";
-import QuoteForm from "@/components/ProformaQuoteForm";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +18,16 @@ import {
   Star,
   CheckCircle
 } from "lucide-react";
+
+// Sections sous la ligne de flottaison : chargées à la demande (hors du chunk initial)
+const QuoteForm = lazy(() => import("@/components/ProformaQuoteForm"));
+const ContactSection = lazy(() => import("@/components/ContactSection"));
+const Footer = lazy(() => import("@/components/Footer"));
+
+// Réserve la place (anti-CLS) et conserve l'ancre de défilement pendant le chargement du chunk
+const SectionFallback = ({ id, className = "" }: { id?: string; className?: string }) => (
+  <div id={id} className={className} aria-hidden="true" />
+);
 
 const Index = () => {
   const handleCall = () => {
@@ -162,7 +170,9 @@ const Index = () => {
 
         <ProductCatalog />
 
-        <QuoteForm />
+        <Suspense fallback={<SectionFallback id="devis" className="py-16 min-h-[600px]" />}>
+          <QuoteForm />
+        </Suspense>
 
         {/* Quick Tips */}
         <section className="py-16 bg-background">
@@ -454,9 +464,13 @@ const Index = () => {
           </div>
         </section>
 
-        <ContactSection />
+        <Suspense fallback={<SectionFallback id="contact" className="py-20 min-h-[600px]" />}>
+          <ContactSection />
+        </Suspense>
       </main>
-      <Footer />
+      <Suspense fallback={<SectionFallback className="min-h-[300px] bg-primary" />}>
+        <Footer />
+      </Suspense>
     </div>
   );
 };

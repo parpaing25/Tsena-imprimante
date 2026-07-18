@@ -348,7 +348,7 @@ Commande passée via le site web TSENA`;
                     <div>
                       <Label htmlFor="city">Ville *</Label>
                       <Select onValueChange={(value) => handleInputChange("city", value)}>
-                        <SelectTrigger>
+                        <SelectTrigger id="city" aria-label="Choisir une ville de livraison">
                           <SelectValue placeholder="Choisir une ville" />
                         </SelectTrigger>
                         <SelectContent>

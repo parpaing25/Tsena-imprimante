@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -53,6 +53,30 @@ const ProductCatalog = () => {
       return matchesSearch && matchesType && matchesBrand && matchesPrice && matchesWifi;
     });
   }, [searchTerm, selectedType, selectedBrand, priceRange, hasWifi]);
+
+  // Rendu progressif : on affiche d'abord un lot restreint de cartes, puis
+  // le reste pendant un temps mort du navigateur, pour alléger le thread
+  // principal au chargement initial (moins de TBT / travail de rendu).
+  const INITIAL_RENDER = 8;
+  const [renderAll, setRenderAll] = useState(false);
+
+  useEffect(() => {
+    setRenderAll(false);
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (w.requestIdleCallback) {
+      const handle = w.requestIdleCallback(() => setRenderAll(true));
+      return () => w.cancelIdleCallback?.(handle);
+    }
+    const handle = window.setTimeout(() => setRenderAll(true), 200);
+    return () => window.clearTimeout(handle);
+  }, [filteredProducts]);
+
+  const visibleProducts = renderAll
+    ? filteredProducts
+    : filteredProducts.slice(0, INITIAL_RENDER);
 
   const handleRequestQuote = (productId: string) => {
     const product = products.find(p => p.id === productId);
@@ -158,7 +182,7 @@ const ProductCatalog = () => {
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filtrer par type d'imprimante">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -170,7 +194,7 @@ const ProductCatalog = () => {
                 </Select>
 
                 <Select value={selectedBrand} onValueChange={setSelectedBrand}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filtrer par marque">
                     <SelectValue placeholder="Marque" />
                   </SelectTrigger>
                   <SelectContent>
@@ -182,7 +206,7 @@ const ProductCatalog = () => {
                 </Select>
 
                 <Select value={priceRange} onValueChange={setPriceRange}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filtrer par gamme de prix">
                     <SelectValue placeholder="Prix" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,7 +220,7 @@ const ProductCatalog = () => {
                 <Select value={hasWifi?.toString() || "all"} onValueChange={(value) => {
                   setHasWifi(value === "all" ? null : value === "true");
                 }}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filtrer par connectivité Wi-Fi">
                     <SelectValue placeholder="Wi-Fi" />
                   </SelectTrigger>
                   <SelectContent>
@@ -224,7 +248,7 @@ const ProductCatalog = () => {
         {filteredProducts.length > 0 ? (
           <AnimatedSection animation="fade-in" delay={600}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product, index) => (
+              {visibleProducts.map((product, index) => (
                 <AnimatedSection 
                   key={product.id}
                   animation="slide-in-up" 

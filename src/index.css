@@ -49,8 +49,8 @@ All colors MUST be HSL for perfect theming.
     --input: 210 20% 88%;
     --ring: 210 85% 35%;
 
-    /* Success Green for positive actions */
-    --success: 145 65% 45%;
+    /* Success Green for positive actions (darkened for WCAG AA text contrast, ~5:1 on white) */
+    --success: 145 65% 30%;
     --success-foreground: 0 0% 100%;
     
     /* Warning for important notices */
