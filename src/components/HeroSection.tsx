@@ -39,7 +39,7 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/70 z-20"></div>
         <div className="relative h-full">
           {featuredProducts.map((product, index) => <div key={product.id} aria-hidden="true" className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-30' : 'opacity-0'}`}>
-              <img src={product.imageUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              <img src={product.imageUrl} alt="" aria-hidden="true" loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" className="w-full h-full object-cover" />
             </div>)}
         </div>
       </div>
@@ -49,12 +49,10 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
-            <div className="animate-slide-in-left">
+            <div>
               <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-6">
-                <span className="block animate-bounce-in">Tongasoa</span>
-                <span className="block text-accent-light animate-bounce-in" style={{
-                animationDelay: '0.2s'
-              }}>
+                <span className="block">Tongasoa</span>
+                <span className="block text-accent-light">
                   chez Tsena Imprimante
                 </span>
               </h1>
@@ -114,12 +112,12 @@ const HeroSection = () => {
           </div>
 
           {/* Right Content - Product Showcase */}
-          <div className="relative animate-slide-in-right">
+          <div className="relative">
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-6 border border-white/20 px-4 sm:px-6 ml-40 sm:ml-44 lg:ml-48 mr-1 sm:mr-4 lg:mr-8">
-              <h3 className="text-white text-lg font-semibold mb-4 text-center flex items-center justify-center gap-2">
+              <h2 className="text-white text-lg font-semibold mb-4 text-center flex items-center justify-center gap-2">
                 <Zap className="h-4 w-4 text-accent-light" />
                 Nos Imprimantes Populaires
-              </h3>
+              </h2>
               
               <Carousel className="w-full">
                 <CarouselContent>
@@ -145,7 +143,7 @@ const HeroSection = () => {
                         </div>
                         
                         <div className="space-y-1">
-                          <h4 className="font-bold text-base leading-tight">{product.name}</h4>
+                          <h3 className="font-bold text-base leading-tight">{product.name}</h3>
                           <p className="text-accent-light font-bold text-xl">
                             {new Intl.NumberFormat('fr-FR').format(product.priceMin)} Ariary
                           </p>
@@ -213,8 +211,10 @@ const HeroSection = () => {
     }}></div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
-        {featuredProducts.map((_, index) => <button key={index} onClick={() => setCurrentSlide(index)} aria-label={`Afficher l'imprimante ${index + 1} sur ${featuredProducts.length}`} className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/30'}`} />)}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center z-30">
+        {featuredProducts.map((_, index) => <button key={index} onClick={() => setCurrentSlide(index)} aria-label={`Afficher l'imprimante ${index + 1} sur ${featuredProducts.length}`} aria-current={index === currentSlide ? 'true' : undefined} className="flex items-center justify-center min-w-[24px] min-h-[24px] p-2">
+            <span aria-hidden="true" className={`block h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/30 w-3'}`} />
+          </button>)}
       </div>
 
       {/* Image Lightbox */}
