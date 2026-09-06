@@ -687,9 +687,7 @@ const ArticleDetail = () => {
                   Partager
                 </Button>
               </div>
-              <CardTitle className="text-3xl text-primary mb-4">
-                {article.title}
-              </CardTitle>
+              <h1 className="text-3xl text-primary mb-4">{article.title}</h1>
               <p className="text-lg text-muted-foreground mb-4">
                 {article.excerpt}
               </p>

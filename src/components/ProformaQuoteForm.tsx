@@ -8,13 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Phone, 
-  Mail, 
-  Building, 
-  MapPin, 
-  FileText, 
-  Send, 
+import {
+  Phone,
+  Mail,
+  Building,
+  MapPin,
+  FileText,
+  Send,
   Download,
   MessageCircle,
   Plus,
@@ -29,6 +29,9 @@ import { deliveryRates, getDeliveryRate, calculateDeliveryPrice, formatPrice, De
 import type { InvoiceData } from "@/utils/pdfGenerator";
 import type jsPDF from 'jspdf';
 import { toast } from "sonner";
+import { CONTACT, lienWhatsApp, appeler } from "@/config/contact";
+import { envoyerLead, telephoneValide } from "@/lib/leads";
+import { evenement } from "@/lib/mesure";
 
 interface SelectedProduct {
   product: Product;
@@ -66,23 +69,21 @@ const ProformaQuoteForm = () => {
   const regions = deliveryRates.map(rate => rate.region);
 
   const handleCall = () => {
-    window.location.href = "tel:+261337106334";
+    evenement("clic_appel", { ou: "devis" });
+    appeler();
   };
 
   const handleWhatsApp = (message: string) => {
-    const whatsappUrl = `https://wa.me/261327209033?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    evenement("clic_whatsapp", { ou: "devis" });
+    window.open(lienWhatsApp(message), '_blank', 'noopener');
   };
 
-  const validatePhone = (phone: string) => {
-    const phoneRegex = /^(032|033|034|038)\s?\d{2}\s?\d{3}\s?\d{2}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
+  const validatePhone = (phone: string) => telephoneValide(phone);
 
   const toggleProductSelection = (product: Product) => {
     setFormData(prev => {
       const existingIndex = prev.selectedProducts.findIndex(p => p.product.id === product.id);
-      
+
       if (existingIndex >= 0) {
         // Remove product
         return {
@@ -101,7 +102,7 @@ const ProformaQuoteForm = () => {
 
   const updateProductQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
-    
+
     setFormData(prev => ({
       ...prev,
       selectedProducts: prev.selectedProducts.map(item =>
@@ -123,7 +124,7 @@ const ProformaQuoteForm = () => {
       return count + item.quantity;
     }, 0);
 
-    const deliveryPrice = formData.region ? 
+    const deliveryPrice = formData.region ?
       calculateDeliveryPrice(formData.region, totalWeight, formData.deliveryType, formData.distanceInTana, totalQuantity) : 0;
 
     const total = subtotal + deliveryPrice;
@@ -176,10 +177,34 @@ const ProformaQuoteForm = () => {
 
     const pdf = PDFGenerator.generateInvoice(invoiceData);
     setGeneratedPdf(pdf);
+    evenement("devis_pdf", { n: formData.selectedProducts.length, total: calculateTotals.total });
 
     toast.success("Facture proforma générée !", {
       description: "Vous pouvez maintenant la télécharger ou l'envoyer par WhatsApp."
     });
+
+    // Audit 06/09/2026 : la demande de devis est aussi ENREGISTRÉE côté serveur
+    // (avant, elle n'existait que sur l'appareil du client).
+    const resultat = await envoyerLead({
+      type: "devis",
+      nom: formData.name,
+      telephone: formData.phone,
+      email: formData.email,
+      entreprise: formData.company,
+      region: formData.region,
+      message: formData.message,
+      produits: formData.selectedProducts.map(item => ({ id: item.product.id, nom: item.product.name, quantite: item.quantity, prix: item.product.priceMin })),
+      livraison: `${formData.deliveryType} — ${formatPrice(calculateTotals.deliveryPrice)} MGA`,
+      total: calculateTotals.total,
+    });
+    if (resultat.ok) {
+      evenement("devis_envoye");
+      toast.success(`Demande enregistrée (référence ${resultat.id})`, {
+        description: "Nous vous rappelons pour confirmer disponibilité et délai."
+      });
+    } else {
+      evenement("formulaire_erreur", { f: "devis", e: resultat.erreur });
+    }
   };
 
   const downloadPdf = () => {
@@ -193,28 +218,28 @@ const ProformaQuoteForm = () => {
     if (generatedPdf) {
       // D'abord télécharger le PDF automatiquement
       generatedPdf.save(`Facture-Proforma-${formData.name.replace(/\s+/g, '-')}.pdf`);
-      
+
       // Ensuite envoyer le message WhatsApp avec les instructions
       const message = `Bonjour ! Voici ma demande de devis pour les imprimantes sélectionnées:\n\n` +
-        `📋 *DÉTAILS CLIENT:*\n` +
+        `*DÉTAILS CLIENT:*\n` +
         `Nom: ${formData.name}\n` +
         `Téléphone: ${formData.phone}\n` +
         `Région: ${formData.region}\n` +
         `${formData.company ? `Entreprise: ${formData.company}\n` : ''}` +
         `${formData.email ? `Email: ${formData.email}\n` : ''}\n` +
-        `🛒 *PRODUITS COMMANDÉS:*\n${formData.selectedProducts.map(item => 
+        `*PRODUITS DEMANDÉS:*\n${formData.selectedProducts.map(item =>
           `• ${item.product.name} - Qté: ${item.quantity} - ${formatPrice(item.product.priceMin * item.quantity)} MGA`
         ).join('\n')}\n\n` +
-        `💰 *RÉSUMÉ FINANCIER:*\n` +
+        `*RÉSUMÉ:*\n` +
         `• Sous-total: ${formatPrice(calculateTotals.subtotal)} MGA\n` +
         `• Livraison: ${formatPrice(calculateTotals.deliveryPrice)} MGA\n` +
         `• *TOTAL: ${formatPrice(calculateTotals.total)} MGA*\n\n` +
-        `📄 *FACTURE PROFORMA:*\n` +
+        `*FACTURE PROFORMA:*\n` +
         `J'ai téléchargé la facture proforma PDF sur mon appareil. Je vais vous l'envoyer dans le prochain message.\n\n` +
-        `Merci de me confirmer la disponibilité et les modalités de paiement ! 🙏`;
+        `Merci de me confirmer la disponibilité et les modalités de paiement !`;
 
       handleWhatsApp(message);
-      
+
       // Notifier l'utilisateur
       toast.success("PDF téléchargé !", {
         description: "Le PDF a été téléchargé. Envoyez-le manuellement via WhatsApp après avoir envoyé le message."
@@ -240,7 +265,7 @@ const ProformaQuoteForm = () => {
   };
 
   return (
-    <section id="devis" className="py-16 bg-background">
+    <section className="bg-background py-8 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-primary mb-4">
@@ -307,7 +332,7 @@ const ProformaQuoteForm = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="region">Région/Ville *</Label>
-                    <Select value={formData.region} onValueChange={(value) => 
+                    <Select value={formData.region} onValueChange={(value) =>
                       setFormData(prev => ({ ...prev, region: value }))
                     }>
                       <SelectTrigger id="region" aria-label="Sélectionner votre région ou ville de livraison">
@@ -338,9 +363,9 @@ const ProformaQuoteForm = () => {
                                 name="deliveryType"
                                 value={option.type}
                                 checked={formData.deliveryType === option.type}
-                                onChange={(e) => setFormData(prev => ({ 
-                                  ...prev, 
-                                  deliveryType: e.target.value as DeliveryType 
+                                onChange={(e) => setFormData(prev => ({
+                                  ...prev,
+                                  deliveryType: e.target.value as DeliveryType
                                 }))}
                                 className="mt-1"
                               />
@@ -385,9 +410,9 @@ const ProformaQuoteForm = () => {
                           max="5"
                           step="0.5"
                           value={formData.distanceInTana}
-                          onChange={(e) => setFormData(prev => ({ 
-                            ...prev, 
-                            distanceInTana: parseFloat(e.target.value) || 0 
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            distanceInTana: parseFloat(e.target.value) || 0
                           }))}
                           placeholder="Distance en km"
                         />
@@ -403,12 +428,13 @@ const ProformaQuoteForm = () => {
                     {products.slice(0, 12).map(product => {
                       const isSelected = formData.selectedProducts.some(p => p.product.id === product.id);
                       const selectedItem = formData.selectedProducts.find(p => p.product.id === product.id);
-                      
+
                       return (
                         <Card key={product.id} className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-primary' : ''}`}>
                           <CardContent className="p-4">
                             <div className="flex items-start space-x-3">
                               <Checkbox
+                                className="h-6 w-6"
                                 checked={isSelected}
                                 onCheckedChange={() => toggleProductSelection(product)}
                                 aria-label={`Sélectionner ${product.name} pour le devis`}
@@ -417,7 +443,7 @@ const ProformaQuoteForm = () => {
                                 <h4 className="font-medium text-sm truncate">{product.name}</h4>
                                 <p className="text-xs text-muted-foreground">{product.brand} • {product.weight}kg</p>
                                 <p className="text-sm font-bold text-primary mt-1">
-                                  {formatProductPrice(product.priceMin)} MGA
+                                  {formatProductPrice(product.priceMin)}
                                 </p>
                                 {isSelected && selectedItem && (
                                   <div className="flex items-center gap-2 mt-2">
@@ -463,8 +489,8 @@ const ProformaQuoteForm = () => {
                 </div>
 
                 {/* Bouton de génération */}
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="btn-hero w-full"
                   disabled={formData.selectedProducts.length === 0 || isSubmitting}
                 >
@@ -488,7 +514,7 @@ const ProformaQuoteForm = () => {
               <CardContent className="space-y-4">
                 <Button onClick={handleCall} className="btn-call w-full">
                   <Phone className="h-4 w-4 mr-2" />
-                  033 71 063 34
+                  {CONTACT.telephonePrincipal.affichage}
                 </Button>
                 <p className="text-sm text-muted-foreground">
                   Appelez-nous pour un devis immédiat et des conseils personnalisés.
@@ -509,9 +535,9 @@ const ProformaQuoteForm = () => {
                       <span>{formatPrice(item.product.priceMin * item.quantity)} MGA</span>
                     </div>
                   ))}
-                  
+
                   <Separator />
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Sous-total:</span>

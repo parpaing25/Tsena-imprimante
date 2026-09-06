@@ -100,7 +100,9 @@ export const products: Product[] = [
     model: "MG2545S",
     type: "inkjet",
     category: "multifunction",
-    priceMin: 410000,
+    // Audit 06/09/2026 : prix alignes sur la bible d'Andry (16/07/2026) :
+    // 340 000 sans kit / 410 000 avec kit. Le site affichait 410 000 – 410 000.
+    priceMin: 340000,
     priceMax: 410000,
     currency: "MGA",
     features: ["Scanner", "Copieur", "Compact", "Abordable", "Papier photo 200g/m²"],
@@ -111,7 +113,7 @@ export const products: Product[] = [
     colorPrint: true,
     formats: ["A4", "Photo"],
     monthlyVolume: "100-300 pages",
-    description: "Imprimante multifonction d'entrée de gamme. Capacité: 70 feuilles papier ordinaire + 20 feuilles photo. Papier photo jusqu'à 200g/m². Interface USB haute vitesse. Dimensions: 426×306×145mm, 3.5kg. Parfaite pour usage domestique occasionnel. Prix: 410,000 MGA.",
+    description: "Imprimante multifonction d'entrée de gamme. Capacité: 70 feuilles papier ordinaire + 20 feuilles photo. Papier photo jusqu'à 200g/m². Interface USB haute vitesse. Dimensions: 426×306×145mm, 3.5kg. Parfaite pour usage domestique occasionnel. Sans kit: 340,000 MGA, avec kit: 410,000 MGA.",
     imageUrl: "/lovable-uploads/22d2190c-c4a0-4b6b-8619-a374bdf9604d.webp",
     inStock: true,
     kitIncluded: false,
@@ -124,7 +126,8 @@ export const products: Product[] = [
     model: "TR4640",
     type: "inkjet",
     category: "multifunction",
-    priceMin: 520000,
+    // Audit 06/09/2026 : 500 000 sans kit selon la bible d'Andry (le site disait 520 000).
+    priceMin: 500000,
     priceMax: 590000,
     currency: "MGA",
     features: ["Wi-Fi", "Fax", "ADF", "Recto-verso auto", "Cloud Link", "Écran LCD Full Dot"],
@@ -135,7 +138,7 @@ export const products: Product[] = [
     colorPrint: true,
     formats: ["A4", "Photo", "Legal"],
     monthlyVolume: "500-1000 pages",
-    description: "Solution bureau complète avec Wi-Fi, fax, impression recto-verso automatique. Capacité: 100 feuilles papier + 20 photo. Interface Wi-Fi, USB, PIXMA Cloud Link. Écran LCD Full Dot. Dimensions: 435×295×189mm, 5.9kg. Sans kit: 520,000 MGA, avec kit: 590,000 MGA. Idéale petites entreprises.",
+    description: "Solution bureau complète avec Wi-Fi, fax, impression recto-verso automatique. Capacité: 100 feuilles papier + 20 photo. Interface Wi-Fi, USB, PIXMA Cloud Link. Écran LCD Full Dot. Dimensions: 435×295×189mm, 5.9kg. Sans kit: 500,000 MGA, avec kit: 590,000 MGA. Idéale petites entreprises.",
     imageUrl: "/lovable-uploads/7a860bdf-62ea-4c69-8a97-bfe0e02cb5c6.webp",
     inStock: true,
     kitIncluded: false,
@@ -379,6 +382,26 @@ export const products: Product[] = [
     weight: 3.9
   }
 ];
+
+/**
+ * Prix court pour les cartes et le mobile : « 860.000 Ar ».
+ * Refonte mobile du 07/09/2026 — « 1.530.000 MGA » ne tient pas dans une
+ * colonne de 174 px, et « Ar » est la notation des visuels de la page Facebook.
+ */
+export const formatPriceCourt = (price: number) =>
+  new Intl.NumberFormat("fr-FR").format(price).replace(/\s/g, ".") + " Ar";
+
+/** Famille d'imprimante en deux mots, telle que la nomment les clients. */
+export const typeCourt = (p: Pick<Product, "type">) =>
+  ({ tank: "Réservoir", laser: "Laser", inkjet: "Jet d'encre" } as const)[p.type];
+
+/** Ce qui distingue le modèle en une poignée de mots. */
+export const resumeCourt = (p: Pick<Product, "hasWifi" | "isMultifunction" | "formats" | "hasDuplex">) => {
+  if (p.formats.includes("A3") || p.formats.includes("A3+")) return "format A3";
+  if (p.hasWifi) return p.isMultifunction ? "Wi-Fi, copie, scan" : "Wi-Fi";
+  if (p.isMultifunction) return "copie, scan";
+  return p.hasDuplex ? "recto-verso" : "USB";
+};
 
 export const formatPrice = (price: number, currency: string = "MGA") => {
   return new Intl.NumberFormat('fr-FR').format(price).replace(/\s/g, '.').replace(/\//g, '.') + " " + currency;

@@ -101,14 +101,14 @@ export const getDeliveryRate = (region: string): DeliveryRate => {
 export type DeliveryType = 'local-tana' | 'plane' | 'taxi-brousse' | 'rapid-service';
 
 export const calculateDeliveryPrice = (
-  region: string, 
-  totalWeight: number, 
+  region: string,
+  totalWeight: number,
   deliveryType: DeliveryType,
   distanceInTana?: number, // Pour livraison locale à Tana (0-5km)
   totalQuantity: number = 1 // Nombre total d'imprimantes
 ): number => {
   const rate = getDeliveryRate(region);
-  
+
   switch (deliveryType) {
     case 'local-tana':
       if (region === 'Antananarivo' && rate.localTanaRate) {
@@ -120,11 +120,11 @@ export const calculateDeliveryPrice = (
         return pricePerPrinter * totalQuantity;
       }
       return 0;
-      
+
     case 'plane':
       // 5500 MGA/kg, minimum 40000 MGA
       return Math.max(40000, 5500 * totalWeight);
-      
+
     case 'taxi-brousse':
       // Prix fixe pour la première imprimante + moitié du prix pour chaque imprimante supplémentaire
       if (totalQuantity <= 1) {
@@ -134,12 +134,13 @@ export const calculateDeliveryPrice = (
         const additionalCost = (rate.taxiBrousseRate / 2) * additionalPrinters;
         return rate.taxiBrousseRate + additionalCost;
       }
-      
-    case 'rapid-service':
+
+    case 'rapid-service': {
       // 1200 MGA/kg/100km, minimum 15000 MGA
       const basePrice = rate.rapidServiceBaseRate * totalWeight;
       return Math.max(15000, basePrice);
-      
+    }
+
     default:
       return 0;
   }
@@ -148,7 +149,7 @@ export const calculateDeliveryPrice = (
 export const getDeliveryOptions = (region: string) => {
   const rate = getDeliveryRate(region);
   const options = [];
-  
+
   if (region === 'Antananarivo' && rate.localTanaRate) {
     options.push({
       type: 'local-tana' as DeliveryType,
@@ -158,7 +159,7 @@ export const getDeliveryOptions = (region: string) => {
       estimatedDays: rate.estimatedDays
     });
   }
-  
+
   options.push(
     {
       type: 'plane' as DeliveryType,
@@ -182,7 +183,7 @@ export const getDeliveryOptions = (region: string) => {
       estimatedDays: '2-4 jours'
     }
   );
-  
+
   return options;
 };
 

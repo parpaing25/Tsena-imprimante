@@ -5,7 +5,12 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: './',
+  // Audit 06/09/2026 (P0) : `base: './'` produisait des chemins RELATIFS
+  // (./assets/…). Sur /blog/1 ou /faq/, le navigateur cherchait
+  // /blog/assets/index-….js, o2switch renvoyait index.html en text/html et le
+  // module échouait (« Strict MIME type checking ») : page figée, sans style.
+  // Le site vit à la racine du sous-domaine : les chemins sont absolus.
+  base: "/",
   server: {
     host: "::",
     port: 8080,

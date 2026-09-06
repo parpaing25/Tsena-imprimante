@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Phone, 
-  Mail, 
-  MessageCircle, 
-  MapPin, 
-  Clock, 
-  Facebook, 
+import {
+  Phone,
+  Mail,
+  MessageCircle,
+  MapPin,
+  Clock,
+  Facebook,
   Send,
   User,
   HelpCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AnimatedSection from "./AnimatedSection";
+import { CONTACT, appeler, ouvrirMessenger, ouvrirFacebook, lienWhatsApp } from "@/config/contact";
+import { envoyerLead, telephoneValide } from "@/lib/leads";
+import { evenement } from "@/lib/mesure";
 
 const ContactSection = () => {
   const { toast } = useToast();
@@ -28,21 +31,33 @@ const ContactSection = () => {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Refonte mobile 07/09/2026 : le formulaire (1 100 px de champs) se deplie a la
+  // demande. Les conversions reelles — appel, WhatsApp, Messenger — sont au-dessus.
+  const [formOuvert, setFormOuvert] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+  const [pieges, setPieges] = useState(""); // champ invisible : rempli = robot
 
   const handleCall = () => {
-    window.location.href = "tel:+261337106334";
+    evenement("clic_appel", { ou: "contact" });
+    appeler();
   };
 
   const handleMessenger = () => {
-    window.open("https://m.me/TsenaImprimante", "_blank");
+    evenement("clic_messenger", { ou: "contact" });
+    ouvrirMessenger();
   };
 
   const handleFacebook = () => {
-    window.open("https://www.facebook.com/TsenaImprimante", "_blank");
+    ouvrirFacebook();
   };
 
   const handleEmail = () => {
-    window.location.href = "mailto:tsenaimprimante@gmail.com";
+    window.location.href = `mailto:${CONTACT.email}`;
+  };
+
+  const handleWhatsApp = () => {
+    evenement("clic_whatsapp", { ou: "contact" });
+    window.open(lienWhatsApp("Bonjour Tsena Imprimante, j'ai une question."), "_blank", "noopener");
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -51,86 +66,80 @@ const ContactSection = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    if (!formData.name || !formData.message) {
+    if (!formData.name.trim() || !formData.message.trim()) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir au moins votre nom et votre message",
+        title: "Il manque une information",
+        description: "Votre nom et votre message sont nécessaires.",
         variant: "destructive",
       });
-      setIsSubmitting(false);
       return;
     }
-
-    try {
-      // Préparation du message
-      const emailMessage = `Nouveau message depuis le site web TSENA
-
-👤 De: ${formData.name}
-${formData.email ? `📧 Email: ${formData.email}` : ""}
-${formData.phone ? `📱 Téléphone: ${formData.phone}` : ""}
-
-${formData.subject ? `📝 Sujet: ${formData.subject}` : ""}
-
-💬 Message:
-${formData.message}
-
----
-Envoyé depuis tsenaimprimante.com`;
-
-      // Ouvrir l'email et messenger
-      const emailSubject = formData.subject || "Nouveau message depuis le site web";
-      const emailBody = encodeURIComponent(emailMessage);
-      window.open(`mailto:tsenaimprimante@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${emailBody}`, "_self");
-
-      // Ouvrir aussi Messenger avec le message
-      setTimeout(() => {
-        const messengerMessage = encodeURIComponent(emailMessage);
-        window.open(`https://www.facebook.com/messages/t/61557419549913?text=${messengerMessage}`, "_blank");
-      }, 1000);
-
+    if (formData.phone && !telephoneValide(formData.phone)) {
       toast({
-        title: "Message envoyé !",
-        description: "Votre message a été transféré par email et sur notre page Facebook. Nous vous répondrons rapidement.",
-      });
-
-      // Reset formulaire
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: ""
-      });
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer le message. Utilisez nos autres canaux de contact.",
+        title: "Numéro invalide",
+        description: "Un numéro malgache : 032, 033, 034, 037 ou 038 suivi de 7 chiffres.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      return;
+    }
+    setIsSubmitting(true);
+    // Audit 06/09/2026 : avant, ce formulaire ouvrait un mailto: puis un profil
+    // Facebook personnel derrière un mur de connexion, et affichait « Message
+    // envoyé ! » sans rien envoyer. Il envoie maintenant au serveur (api/lead.php).
+    const resultat = await envoyerLead(
+      {
+        type: "contact",
+        nom: formData.name.trim(),
+        telephone: formData.phone.trim(),
+        email: formData.email.trim(),
+        sujet: formData.subject.trim(),
+        message: formData.message.trim(),
+      },
+      pieges
+    );
+    setIsSubmitting(false);
+    if (resultat.ok) {
+      evenement("contact_envoye");
+      setReference(resultat.id || "ok");
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    } else {
+      evenement("formulaire_erreur", { f: "contact", e: resultat.erreur });
+      toast({
+        title: "Envoi impossible pour le moment",
+        description: "Utilisez WhatsApp, Messenger ou le téléphone : ces boutons fonctionnent sans le formulaire.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <section id="contact" className="py-20 bg-gradient-elegant">
+    <section id="contact" className="scroll-mt-16 bg-gradient-elegant py-6 sm:py-20">
       <div className="container mx-auto px-4">
-        <AnimatedSection animation="fade-in-scale" className="text-center mb-16">
-          <MessageCircle className="h-16 w-16 mx-auto text-primary mb-6 animate-bounce" />
-          <h2 className="text-4xl font-bold text-primary mb-4">
+        <AnimatedSection animation="fade-in-scale" className="mb-4 text-center sm:mb-16">
+          <MessageCircle className="hidden h-16 w-16 sm:flex mx-auto text-primary mb-6 animate-bounce" />
+          <h2 className="text-xl sm:text-4xl font-bold text-primary mb-4">
             Contactez nos Experts
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Notre équipe d'experts est là pour vous conseiller et répondre 
-            à toutes vos questions. Réponse garantie sous 24h !
+          <p className="text-[12.5px] sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+            Notre équipe d'experts est là pour vous conseiller et répondre
+            à toutes vos questions.
           </p>
         </AnimatedSection>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3">
           {/* Formulaire de Contact */}
-          <AnimatedSection animation="slide-in-left" className="lg:col-span-2">
+          <AnimatedSection animation="slide-in-left" className="order-2 lg:order-1 lg:col-span-2">
+            {!formOuvert && (
+              <Button
+                variant="outline"
+                onClick={() => setFormOuvert(true)}
+                className="h-12 w-full justify-between text-[14.5px] font-semibold sm:hidden"
+              >
+                Écrire un message
+                <Send className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            )}
+            <div className={formOuvert ? "block" : "hidden sm:block"}>
             <Card className="hover:shadow-glow transition-all duration-500">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
@@ -139,7 +148,33 @@ Envoyé depuis tsenaimprimante.com`;
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {reference ? (
+                  <div className="rounded-lg border border-success/30 bg-success/5 p-6 space-y-4" role="status" aria-live="polite">
+                    <h3 className="text-xl font-semibold text-success">Message bien reçu — misaotra !</h3>
+                    <p className="text-muted-foreground">
+                      Référence <strong>{reference}</strong>. Nous vous répondons pendant nos heures d'ouverture,
+                      par téléphone si vous avez laissé un numéro, sinon par e-mail.
+                    </p>
+                    <p className="text-sm text-muted-foreground">Besoin d'une réponse tout de suite ?</p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button onClick={handleWhatsApp} className="btn-call">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Continuer sur WhatsApp
+                      </Button>
+                      <Button onClick={handleCall} variant="outline">
+                        <Phone className="h-4 w-4 mr-2" />
+                        Appeler le {CONTACT.telephonePrincipal.affichage}
+                      </Button>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setReference(null)}>Envoyer un autre message</Button>
+                  </div>
+                ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Piège à robots : invisible, ne doit jamais être rempli */}
+                  <div className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
+                    <label htmlFor="site_web">Ne pas remplir</label>
+                    <input id="site_web" name="site_web" type="text" tabIndex={-1} autoComplete="off" value={pieges} onChange={(e) => setPieges(e.target.value)} />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Nom complet *</Label>
@@ -212,16 +247,20 @@ Envoyé depuis tsenaimprimante.com`;
                   </Button>
 
                   <p className="text-sm text-muted-foreground text-center bg-muted/30 p-3 rounded-lg">
-                    💡 <strong>Double envoi :</strong> Votre message sera envoyé par email ET sur notre page Facebook 
-                    pour une réponse encore plus rapide !
+                    Votre message nous parvient immédiatement (e-mail et notification). Réponse pendant les heures
+                    d'ouverture. Vos coordonnées servent uniquement à vous répondre —{" "}
+                    <a href="/privacy" className="underline">politique de confidentialité</a>.
                   </p>
                 </form>
+                )}
               </CardContent>
             </Card>
+            </div>
           </AnimatedSection>
 
           {/* Informations de Contact */}
-          <div className="space-y-6">
+
+                    <div className="order-1 space-y-3 sm:space-y-6 lg:order-2">
             {/* Contact Direct */}
             <AnimatedSection animation="slide-in-right" delay={200}>
               <Card className="hover:shadow-medium transition-all duration-300">
@@ -235,19 +274,23 @@ Envoyé depuis tsenaimprimante.com`;
                   <div className="space-y-3">
                     <Button onClick={handleCall} className="w-full btn-call hover-scale">
                       <Phone className="h-4 w-4 mr-2" />
-                      033 71 063 34
+                      {CONTACT.telephonePrincipal.affichage}
+                    </Button>
+                    <Button onClick={handleWhatsApp} variant="outline" className="w-full hover-scale border-[#25d366] text-[#075e54]">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      WhatsApp
                     </Button>
                     <Button onClick={handleEmail} variant="outline" className="w-full hover-scale">
                       <Mail className="h-4 w-4 mr-2" />
-                      tsenaimprimante@gmail.com
+                      {CONTACT.email}
                     </Button>
                     <Button onClick={handleMessenger} variant="outline" className="w-full hover-scale">
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Facebook Messenger
                     </Button>
-                    <Button 
-                      onClick={handleFacebook} 
-                      className="w-full bg-[#1877f2] text-white hover:bg-[#166fe5] hover-scale"
+                    <Button
+                      onClick={handleFacebook}
+                      className="w-full bg-[#1565c0] text-white hover:bg-[#0d47a1] hover-scale"
                     >
                       <Facebook className="h-4 w-4 mr-2" />
                       Page Facebook
@@ -274,25 +317,25 @@ Envoyé depuis tsenaimprimante.com`;
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Samedi</span>
-                      <span className="text-sm text-muted-foreground">8h - 16h</span>
+                      <span className="text-sm text-muted-foreground">8h - 13h</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Dimanche</span>
-                      <span className="text-sm text-muted-foreground">Urgences uniquement</span>
+                      <span className="text-sm text-muted-foreground">Fermé (messages lus)</span>
                     </div>
                   </div>
                   <div className="mt-4 p-3 bg-gradient-subtle rounded-lg border-l-4 border-primary">
                     <p className="text-xs text-muted-foreground">
-                      <strong>⚡ Réponse garantie</strong> sous 24h maximum ! 
-                      Pour les urgences, appelez directement.
+                      <strong>Réponse le jour même</strong> pendant les heures d'ouverture.
+                      Pour une urgence, appelez plutôt que d'écrire.
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </AnimatedSection>
 
-            {/* Zone de Service */}
-            <AnimatedSection animation="slide-in-right" delay={600}>
+            {/* Zone de service — masquée sur téléphone : déjà dans le bandeau de confiance */}
+            <AnimatedSection animation="slide-in-right" delay={600} className="hidden sm:block">
               <Card className="hover:shadow-medium transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -306,18 +349,18 @@ Envoyé depuis tsenaimprimante.com`;
                       <MapPin className="h-4 w-4 text-primary" />
                       <span className="font-semibold">Toute l'île de Madagascar</span>
                     </div>
-                    
+
                     <div className="space-y-3 text-sm">
                       <div className="bg-success/10 p-3 rounded-lg">
                         <div className="font-medium text-success mb-1">🚚 Livraison gratuite</div>
                         <div className="text-muted-foreground">Antananarivo et environs</div>
                       </div>
-                      
+
                       <div className="bg-primary/10 p-3 rounded-lg">
                         <div className="font-medium text-primary mb-1">🔧 Installation gratuite</div>
                         <div className="text-muted-foreground">Antananarivo uniquement</div>
                       </div>
-                      
+
                       <div className="bg-accent/10 p-3 rounded-lg">
                         <div className="font-medium text-accent-foreground mb-1">📦 Autres régions</div>
                         <div className="text-muted-foreground text-xs">
@@ -332,8 +375,8 @@ Envoyé depuis tsenaimprimante.com`;
               </Card>
             </AnimatedSection>
 
-            {/* FAQ Rapide */}
-            <AnimatedSection animation="slide-in-right" delay={800}>
+            {/* FAQ rapide — masquée sur téléphone : la page /faq est liée juste au-dessus */}
+            <AnimatedSection animation="slide-in-right" delay={800} className="hidden sm:block">
               <Card className="hover:shadow-medium transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -353,7 +396,7 @@ Envoyé depuis tsenaimprimante.com`;
                     </div>
                     <div className="border-l-2 border-accent pl-3">
                       <div className="font-medium text-accent">Garantie ?</div>
-                      <div className="text-muted-foreground">1 an constructeur + support gratuit</div>
+                      <div className="text-muted-foreground">Constructeur, durée selon le modèle</div>
                     </div>
                   </div>
                   <Button asChild variant="outline" className="w-full hover-scale mt-4" size="sm">

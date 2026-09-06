@@ -1,16 +1,30 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Tsena Imprimante — https://tsenaimprimante.fonenako.mg
+# Audit 06/09/2026 : l'ancien fichier pointait vers un plan du site PHP inexistant
+# (le serveur renvoyait la page d'accueil en HTML). Le plan du site est maintenant
+# genere au build (scripts/gen-seo.mjs).
 
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://tsenaimprimante.fonenako.mg/sitemap.php
+# Moteurs de reponse IA : autorises volontairement. Un client qui demande a un
+# assistant « imprimante Canon a Tana » doit pouvoir tomber sur nos prix et nos
+# conditions (voir aussi /llms.txt).
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://tsenaimprimante.fonenako.mg/sitemap.xml

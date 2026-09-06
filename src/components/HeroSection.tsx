@@ -1,223 +1,178 @@
 import { Button } from "@/components/ui/button";
-import { Phone, Eye, FileText, MessageCircle, Zap } from "lucide-react";
+import { Phone, Eye, MessageCircle, Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useState, useEffect } from "react";
-import { products } from "@/data/products";
+import { products, formatPriceCourt } from "@/data/products";
 import ImageLightbox from "./ImageLightbox";
+import { appeler, CONTACT } from "@/config/contact";
+import { evenement } from "@/lib/mesure";
+
+/**
+ * Bandeau d'accueil. Refonte mobile du 07/09/2026.
+ *
+ * Avant : 964 px de haut sur un téléphone, et une colonne de grille
+ * dimensionnée par le carrousel — 1 082 px de large dans un écran de 390 px,
+ * donc un titre coupé et trois boutons qui paraissaient vides.
+ *
+ * Après : sur téléphone, ~340 px — le titre, une phrase, deux actions, trois
+ * preuves. Le carrousel n'apparaît qu'à partir de `lg:`, là où il y a la place
+ * pour lui ; sur téléphone ce sont les vraies cartes produit, juste en
+ * dessous, qui montrent le catalogue.
+ */
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<{url: string, alt: string} | null>(null);
-  const featuredProducts = products.filter(p => p.isPopular).slice(0, 5);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null);
+  const featuredProducts = products.filter((p) => p.isPopular).slice(0, 5);
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % featuredProducts.length);
+      setCurrentSlide((prev) => (prev + 1) % featuredProducts.length);
     }, 4000);
     return () => clearInterval(timer);
   }, [featuredProducts.length]);
+
   const handleCall = () => {
-    window.location.href = "tel:+261337106334";
+    evenement("clic_appel", { ou: "hero" });
+    appeler();
   };
-  const handleCatalogue = () => {
-    document.getElementById("catalogue")?.scrollIntoView({
-      behavior: "smooth"
-    });
-  };
-  const handleDevis = () => {
-    document.getElementById("devis")?.scrollIntoView({
-      behavior: "smooth"
-    });
-  };
+
+  const versCatalogue = () => document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" });
 
   const handleImageClick = (imageUrl: string, productName: string) => {
     setSelectedImage({ url: imageUrl, alt: productName });
     setLightboxOpen(true);
   };
-  return <section className="relative min-h-[80vh] flex items-center bg-gradient-hero overflow-hidden">
-      {/* Animated Product Carousel Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/70 z-20"></div>
+
+  return (
+    <section className="relative overflow-hidden bg-gradient-hero lg:flex lg:min-h-[80vh] lg:items-center">
+      {/* Photo produit en filigrane : elle donne le sujet sans coûter de la hauteur */}
+      <div aria-hidden="true" className="absolute inset-0">
+        <div className="absolute inset-0 z-20 bg-gradient-to-r from-primary/90 to-accent/70"></div>
         <div className="relative h-full">
-          {featuredProducts.map((product, index) => <div key={product.id} aria-hidden="true" className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-30' : 'opacity-0'}`}>
-              <img src={product.imageUrl} alt="" aria-hidden="true" loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} decoding="async" className="w-full h-full object-cover" />
-            </div>)}
+          {featuredProducts.map((product, index) => (
+            <div
+              key={product.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-30" : "opacity-0"}`}
+            >
+              <img
+                src={product.imageUrl}
+                alt=""
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 relative z-30">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="text-white">
-            <div>
-              <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-6">
-                <span className="block">Tongasoa</span>
-                <span className="block text-accent-light">
-                  chez Tsena Imprimante
-                </span>
-              </h1>
-              
-              <p className="text-lg sm:text-xl md:text-2xl mb-4 opacity-90 animate-fade-in-scale" style={{
-              animationDelay: '0.4s'
-            }}>
-                Votre partenaire imprimante à Madagascar
-              </p>
-              
-              <p className="text-base sm:text-lg mb-8 opacity-80 max-w-2xl animate-slide-in-up" style={{
-              animationDelay: '0.6s'
-            }}>
-                Canon, HP, Epson, Brother • Jet d'encre, Laser, EcoTank • 
-                Livraison province • Installation GRATUITE à Tana
-              </p>
-            </div>
+      <div className="container relative z-30 mx-auto px-4 py-6 lg:py-12">
+        <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          {/* Colonne texte */}
+          <div className="min-w-0 text-white">
+            <h1 className="text-[30px] font-extrabold leading-[1.12] tracking-tight sm:text-5xl md:text-6xl">
+              <span className="block">Tongasoa</span>
+              <span className="block text-accent-light">chez Tsena Imprimante</span>
+            </h1>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 animate-slide-in-up" style={{
-            animationDelay: '0.8s'
-          }}>
-              <Button onClick={handleCall} className="btn-hero bg-success hover:bg-success/90 text-xs sm:text-lg px-2 py-3 sm:px-4 sm:py-6 shadow-glow animate-pulse-glow" size="sm">
-                <Phone className="h-3 w-3 sm:h-5 sm:w-5 mr-1 sm:mr-3" />
-                <span className="sm:hidden">Appeler</span>
-                <span className="hidden sm:inline">Appeler 033 71 063 34</span>
+            <p className="mt-2.5 max-w-md text-[14px] leading-relaxed text-white/90 sm:mt-4 sm:text-xl">
+              Imprimantes neuves Canon, HP et Epson — prix en ariary, livrées partout à Madagascar.
+            </p>
+
+            <div className="mt-4 flex gap-2 sm:mt-6 sm:gap-4">
+              <Button
+                onClick={handleCall}
+                className="h-12 flex-1 gap-2 rounded-lg bg-success text-[15px] font-bold text-success-foreground shadow-lg hover:bg-success/90 sm:h-14 sm:flex-none sm:px-6 sm:text-lg"
+              >
+                <Phone className="h-[17px] w-[17px]" aria-hidden="true" />
+                {CONTACT.telephonePrincipal.affichage}
               </Button>
-              
-              <Button onClick={handleCatalogue} variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary text-xs sm:text-lg px-3 py-2 sm:px-8 sm:py-6 backdrop-blur-sm hover-lift" size="sm">
-                <Eye className="h-3 w-3 sm:h-5 sm:w-5 mr-1 sm:mr-3" />
-                <span className="sm:hidden">Catalogue</span>
-                <span className="hidden sm:inline">Voir le Catalogue</span>
-              </Button>
-              
-              <Button onClick={handleDevis} variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary text-xs sm:text-lg px-3 py-2 sm:px-8 sm:py-6 backdrop-blur-sm hover-lift" size="sm">
-                <FileText className="h-3 w-3 sm:h-5 sm:w-5 mr-1 sm:mr-3" />
-                <span className="sm:hidden">Devis</span>
-                <span className="hidden sm:inline">Demander un Devis</span>
+              <Button
+                onClick={versCatalogue}
+                variant="outline"
+                className="h-12 rounded-lg border-[1.5px] border-white/40 bg-white/10 px-4 text-[15px] font-semibold text-white backdrop-blur-sm hover:bg-white hover:text-primary sm:h-14 sm:px-6 sm:text-lg"
+              >
+                <Eye className="mr-2 hidden h-5 w-5 sm:inline" aria-hidden="true" />
+                Catalogue
               </Button>
             </div>
 
-            {/* Contact Info */}
-            <div className="mt-12 flex flex-col sm:flex-row gap-6 text-sm opacity-80 animate-fade-in-scale" style={{
-            animationDelay: '1s'
-          }}>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>033 71 063 34</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                <a href="https://m.me/TsenaImprimante" target="_blank" rel="noopener noreferrer" className="hover:text-accent-light transition-colors">
-                  Facebook Messenger
-                </a>
-              </div>
+            <ul className="mt-3.5 flex flex-wrap gap-1.5 sm:mt-6 sm:gap-2">
+              {["Neuf sous carton", "Installation gratuite à Tana", "Livraison province"].map((p) => (
+                <li
+                  key={p}
+                  className="rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-semibold text-white sm:px-3 sm:py-1.5 sm:text-sm"
+                >
+                  {p}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 hidden items-center gap-6 text-sm text-white/80 sm:flex">
+              <span className="flex items-center gap-2">
+                <Phone className="h-4 w-4" aria-hidden="true" />
+                {CONTACT.telephonePrincipal.affichage}
+              </span>
+              <a
+                href={CONTACT.messenger}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[44px] items-center gap-2 transition-colors hover:text-accent-light"
+                onClick={() => evenement("clic_messenger", { ou: "hero" })}
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                Facebook Messenger
+              </a>
             </div>
           </div>
 
-          {/* Right Content - Product Showcase */}
-          <div className="relative">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-6 border border-white/20 px-4 sm:px-6 ml-40 sm:ml-44 lg:ml-48 mr-1 sm:mr-4 lg:mr-8">
-              <h2 className="text-white text-lg font-semibold mb-4 text-center flex items-center justify-center gap-2">
-                <Zap className="h-4 w-4 text-accent-light" />
-                Nos Imprimantes Populaires
+          {/* Carrousel : ordinateur seulement. Sur téléphone, ce sont les vraies cartes qui suivent. */}
+          <div className="relative hidden min-w-0 lg:block">
+            <div className="rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-md">
+              <h2 className="mb-4 flex items-center justify-center gap-2 text-center text-lg font-semibold text-white">
+                <Zap className="h-4 w-4 text-accent-light" aria-hidden="true" />
+                Nos imprimantes populaires
               </h2>
-              
+
               <Carousel className="w-full">
                 <CarouselContent>
-                  {featuredProducts.map((product, index) => <CarouselItem key={product.id}>
-                      <div className="flex flex-col items-center text-center text-white p-2 space-y-3">
-                        <div className="relative group">
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            width={272}
-                            height={160}
-                            loading={index === 0 ? "eager" : "lazy"}
-                            decoding="async"
-                            {...(index === 0 ? { fetchpriority: "high" } : {})}
-                            className="w-64 h-36 sm:w-68 sm:h-40 object-contain rounded-3xl mb-3 shadow-xl hover-lift transition-all duration-300 group-hover:scale-105 cursor-pointer"
-                            onClick={() => handleImageClick(product.imageUrl, product.name)}
-                            onError={e => {
-                        e.currentTarget.src = "/placeholder.svg";
-                      }} />
-                          <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs px-1.5 py-0.5 rounded-full font-bold animate-bounce-in">
-                            TOP
-                          </div>
-                        </div>
-                        
+                  {featuredProducts.map((product) => (
+                    <CarouselItem key={product.id}>
+                      <div className="flex flex-col items-center space-y-3 p-2 text-center text-white">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          width={272}
+                          height={160}
+                          loading="lazy"
+                          decoding="async"
+                          className="mb-3 h-40 w-72 cursor-pointer rounded-3xl object-contain shadow-xl transition-all duration-300 hover:scale-105"
+                          onClick={() => handleImageClick(product.imageUrl, product.name)}
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg";
+                          }}
+                        />
                         <div className="space-y-1">
-                          <h3 className="font-bold text-base leading-tight">{product.name}</h3>
-                          <p className="text-accent-light font-bold text-xl">
-                            {new Intl.NumberFormat('fr-FR').format(product.priceMin)} Ariary
-                          </p>
+                          <h3 className="text-base font-bold leading-tight">{product.name}</h3>
+                          <p className="text-xl font-bold text-accent-light">{formatPriceCourt(product.priceMin)}</p>
                         </div>
-                        
-                        <div className="flex flex-wrap justify-center gap-1">
-                          {product.features.slice(0, 3).map((feature, idx) => <span key={idx} className="text-xs bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                              {feature}
-                            </span>)}
-                        </div>
-                        
-                        <div className="flex gap-2 pt-1">
-                          <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border border-white/30 text-xs px-3 py-1" onClick={() => {
-                        document.getElementById("catalogue")?.scrollIntoView({
-                          behavior: "smooth"
-                        });
-                      }}>
-                            Voir détails
-                          </Button>
-                          <Button size="sm" className="bg-accent hover:bg-accent/90 text-white text-xs px-3 py-1" onClick={() => {
-                        document.getElementById("devis")?.scrollIntoView({
-                          behavior: "smooth"
-                        });
-                      }}>
-                            Devis
-                          </Button>
-                        </div>
+                        <Button size="sm" className="bg-accent px-4 text-white hover:bg-accent/90" onClick={versCatalogue}>
+                          Voir le catalogue
+                        </Button>
                       </div>
-                    </CarouselItem>)}
+                    </CarouselItem>
+                  ))}
                 </CarouselContent>
-                <CarouselPrevious className="left-1 bg-white/20 border-white/30 text-white hover:bg-white/30 h-8 w-8" />
-                <CarouselNext className="right-1 bg-white/20 border-white/30 text-white hover:bg-white/30 h-8 w-8" />
+                <CarouselPrevious className="left-1 h-8 w-8 border-white/30 bg-white/20 text-white hover:bg-white/30" />
+                <CarouselNext className="right-1 h-8 w-8 border-white/30 bg-white/20 text-white hover:bg-white/30" />
               </Carousel>
-              
-              {/* Indicateurs de popularité */}
-              <div className="mt-3 text-center">
-                <p className="text-white/80 text-xs">
-                  ⭐ Les choix préférés de nos clients malgaches
-                </p>
-                <div className="flex justify-center gap-1 mt-1">
-                  {featuredProducts.map((_, index) => <div key={index} className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" style={{
-                  animationDelay: `${index * 0.2}s`
-                }}></div>)}
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-
-      {/* Enhanced Floating Animation Elements */}
-      <div aria-hidden="true" className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
-      <div aria-hidden="true" className="absolute bottom-20 right-10 w-16 h-16 bg-accent/20 rounded-full animate-float" style={{
-      animationDelay: '2s'
-    }}></div>
-      <div aria-hidden="true" className="absolute top-1/2 right-20 w-12 h-12 bg-white/5 rounded-full animate-float" style={{
-      animationDelay: '4s'
-    }}></div>
-      <div aria-hidden="true" className="absolute top-32 right-32 w-8 h-8 bg-success/20 rounded-full animate-float" style={{
-      animationDelay: '1s'
-    }}></div>
-      <div aria-hidden="true" className="absolute bottom-32 left-32 w-14 h-14 bg-primary/10 rounded-full animate-float" style={{
-      animationDelay: '3s'
-    }}></div>
-
-      {/* Slide Indicators */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center z-30">
-        {featuredProducts.map((_, index) => <button key={index} onClick={() => setCurrentSlide(index)} aria-label={`Afficher l'imprimante ${index + 1} sur ${featuredProducts.length}`} aria-current={index === currentSlide ? 'true' : undefined} className="flex items-center justify-center min-w-[24px] min-h-[24px] p-2">
-            <span aria-hidden="true" className={`block h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-accent w-8' : 'bg-white/30 w-3'}`} />
-          </button>)}
-      </div>
-
-      {/* Image Lightbox */}
       {selectedImage && (
         <ImageLightbox
           imageUrl={selectedImage.url}
@@ -226,6 +181,8 @@ const HeroSection = () => {
           onClose={() => setLightboxOpen(false)}
         />
       )}
-    </section>;
+    </section>
+  );
 };
+
 export default HeroSection;

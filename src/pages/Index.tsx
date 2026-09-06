@@ -1,26 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import { lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import ProductCatalog from "@/components/ProductCatalog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Lightbulb, 
-  Calculator, 
-  Shield, 
-  Truck, 
-  Phone, 
-  Zap, 
-  Printer, 
-  Wifi,
-  Star,
-  CheckCircle
-} from "lucide-react";
+import SectionDevis from "@/components/SectionDevis";
+import { Card, CardContent } from "@/components/ui/card";
+import { Truck, ShieldCheck, Wrench, Printer, Zap, Wifi, ChevronRight } from "lucide-react";
+import { products, formatPriceCourt } from "@/data/products";
 
-// Sections sous la ligne de flottaison : chargées à la demande (hors du chunk initial)
-const QuoteForm = lazy(() => import("@/components/ProformaQuoteForm"));
 const ContactSection = lazy(() => import("@/components/ContactSection"));
 const Footer = lazy(() => import("@/components/Footer"));
 
@@ -29,446 +17,195 @@ const SectionFallback = ({ id, className = "" }: { id?: string; className?: stri
   <div id={id} className={className} aria-hidden="true" />
 );
 
+/**
+ * Page d'accueil. Refonte mobile du 07/09/2026.
+ *
+ * Mesuré avant : 23 948 px sur un téléphone, soit 28,4 écrans, et le premier
+ * produit à 3 503 px — quatre écrans de pouce avant de voir une imprimante.
+ * Trois sections de plus d'un écran chacune (avantages, types, conseils)
+ * s'intercalaient entre l'accroche et le catalogue.
+ *
+ * Après : le catalogue arrive juste sous l'accroche. Les avantages tiennent en
+ * un bandeau de quatre pictogrammes, les types en trois lignes cliquables, le
+ * devis se déplie à la demande. Trois blocs sont partis : les conseils (ils ont
+ * leur page, /conseils), les logos de marques (déjà dans le bandeau), et les
+ * témoignages — trois avis nominatifs et un « plus de 2000 clients depuis
+ * 2019 » qu'aucune source ne confirmait, remplacés par les seuls chiffres
+ * vérifiables que porte l'activité.
+ */
+
+const AVANTAGES = [
+  { icone: Truck, couleur: "text-primary", titre: "Livraison", detail: "province", texte: "Nous livrons dans toute l'île, par taxi-brousse ou par avion." },
+  { icone: ShieldCheck, couleur: "text-success", titre: "Installation", detail: "gratuite", texte: "À Tana : branchement, Wi-Fi, pilotes et premier test d'impression." },
+  { icone: Wrench, couleur: "text-accent", titre: "SAV &", detail: "garantie", texte: "Neuf sous carton, garantie constructeur, diagnostic téléphonique gratuit." },
+  { icone: Printer, couleur: "text-muted-foreground", titre: "Canon HP", detail: "Epson", texte: "Les trois marques que nous savons dépanner et approvisionner en encre." },
+];
+
+const prixMini = (filtre: (p: (typeof products)[number]) => boolean) =>
+  formatPriceCourt(Math.min(...products.filter(filtre).map((p) => p.priceMin)));
+
 const Index = () => {
-  const handleCall = () => {
-    window.location.href = "tel:+261337106334";
-  };
-
-  const advantages = [
+  // Les prix d'appel se calculent sur le catalogue : une valeur écrite à la main
+  // finit toujours par mentir (« à partir de 690 000 MGA » affiché pour une
+  // gamme qui commence à 850 000, constaté le 06/09/2026).
+  const TYPES = [
     {
-      icon: <Truck className="h-8 w-8 text-primary" />,
-      title: "Livraison Province",
-      description: "Nous livrons dans toute l'île de Madagascar"
+      icone: Zap,
+      teinte: "bg-accent/10 text-accent",
+      titre: "Réservoir d'encre",
+      texte: "Le coût par page le plus bas",
+      prix: prixMini((p) => p.type === "tank"),
     },
     {
-      icon: <Shield className="h-8 w-8 text-success" />,
-      title: "Installation Gratuite",
-      description: "Service d'installation gratuit à Antananarivo"
+      icone: Printer,
+      teinte: "bg-primary/10 text-primary",
+      titre: "Laser",
+      texte: "Noir et blanc rapide, gros volumes",
+      prix: prixMini((p) => p.type === "laser"),
     },
     {
-      icon: <Phone className="h-8 w-8 text-accent" />,
-      title: "Support Technique",
-      description: "Assistance et SAV par téléphone"
+      icone: Wifi,
+      teinte: "bg-success/10 text-success",
+      titre: "Jet d'encre",
+      texte: "Petits volumes, couleur et photo",
+      prix: prixMini((p) => p.type === "inkjet"),
     },
-    {
-      icon: <Star className="h-8 w-8 text-warning" />,
-      title: "Marques Reconnues",
-      description: "Canon, HP, Epson, Brother - Qualité garantie"
-    }
-  ];
-
-  const printerTypes = [
-    {
-      icon: <Zap className="h-6 w-6 text-accent" />,
-      name: "EcoTank",
-      description: "Très économique, idéal pour gros volumes",
-      price: "À partir de 690 000 MGA",
-      popular: true
-    },
-    {
-      icon: <Printer className="h-6 w-6 text-primary" />,
-      name: "Laser",
-      description: "Rapide et précis pour bureaux",
-      price: "À partir de 1 530 000 MGA"
-    },
-    {
-      icon: <Wifi className="h-6 w-6 text-success" />,
-      name: "Jet d'encre Wi-Fi",
-      description: "Impression sans fil depuis mobile",
-      price: "À partir de 340 000 MGA"
-    }
   ];
 
   return (
     <div className="min-h-screen">
       <Helmet>
         <title>Tsena Imprimante Madagascar - Canon, HP, Epson | Livraison Province</title>
-        <meta name="description" content="Vente d'imprimantes Canon, HP, Epson, Brother à Madagascar. Jet d'encre, laser, EcoTank. Livraison province, installation gratuite Tana. Devis gratuit ☎ 033 71 063 34" />
+        <meta name="description" content="Imprimantes Canon, HP, Epson neuves à Madagascar : jet d'encre, laser, réservoir d'encre. Prix en ariary, livraison province, installation gratuite à Tana. Devis gratuit ☎ 033 71 063 34." />
+        <meta property="og:title" content="Tsena Imprimante Madagascar — imprimantes Canon, HP, Epson" />
+        <meta property="og:description" content="Prix en ariary, livraison province, installation gratuite à Tana. Devis gratuit ☎ 033 71 063 34." />
+        <meta property="og:url" content="https://tsenaimprimante.fonenako.mg/" />
         <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/" />
       </Helmet>
       <Header />
       <main>
         <HeroSection />
-        
-        {/* Why Choose Us */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-4">
-                Pourquoi Choisir Tsena Imprimante ?
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Votre satisfaction, notre engagement depuis des années
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {advantages.map((advantage, index) => (
-                <Card key={index} className="text-center hover:shadow-medium transition-all duration-300">
-                  <CardContent className="pt-6">
-                    <div className="flex justify-center mb-4">
-                      {advantage.icon}
-                    </div>
-                    <h3 className="font-semibold mb-2">{advantage.title}</h3>
-                    <p className="text-sm text-muted-foreground">{advantage.description}</p>
-                  </CardContent>
-                </Card>
+
+        {/* Bandeau de confiance : quatre pictogrammes sur téléphone, quatre cartes sur écran large */}
+        <section className="border-b border-border bg-muted/40" aria-label="Nos engagements">
+          <div className="container mx-auto px-2 sm:px-4 sm:py-14">
+            <div className="grid grid-cols-4 gap-1 py-2.5 sm:hidden">
+              {AVANTAGES.map((a) => (
+                <div key={a.titre} className="flex flex-col items-center gap-1 text-center">
+                  <a.icone className={`h-[19px] w-[19px] ${a.couleur}`} aria-hidden="true" />
+                  <span className="text-[10.5px] font-semibold leading-tight text-foreground">
+                    {a.titre}
+                    <br />
+                    {a.detail}
+                  </span>
+                </div>
               ))}
             </div>
-          </div>
-        </section>
 
-        {/* Printer Types */}
-        <section className="py-16 bg-gradient-subtle">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-4">
-                Quel Type d'Imprimante Choisir ?
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Nous vous aidons à faire le bon choix selon vos besoins
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {printerTypes.map((type, index) => (
-                <Card key={index} className="relative hover:shadow-medium transition-all duration-300 hover:-translate-y-1">
-                  {type.popular && (
-                    <Badge className="absolute -top-2 left-4 bg-accent text-accent-foreground">
-                      Populaire
-                    </Badge>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      {type.icon}
-                      {type.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-muted-foreground">{type.description}</p>
-                    <p className="font-semibold text-primary">{type.price}</p>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" })}
-                    >
-                      Voir les modèles
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="text-center mt-8">
-              <Button onClick={handleCall} className="btn-call">
-                <Phone className="h-4 w-4 mr-2" />
-                Besoin de conseils ? Appelez-nous !
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <ProductCatalog />
-
-        <Suspense fallback={<SectionFallback id="devis" className="py-16 min-h-[600px]" />}>
-          <QuoteForm />
-        </Suspense>
-
-        {/* Quick Tips */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-4">
-                <Lightbulb className="h-8 w-8 mx-auto mb-2" />
-                Conseils Pratiques
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Nos experts vous guident pour faire le meilleur choix
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-lg">💡 Coût par page</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>EcoTank:</strong> ~0.02 MGA/page couleur</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Laser:</strong> ~50-80 MGA/page N&B</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Cartouche:</strong> ~200-400 MGA/page</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-lg">📊 Volume recommandé</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Domestique:</strong> 50-200 pages/mois</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Petit bureau:</strong> 200-800 pages/mois</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Entreprise:</strong> 1000+ pages/mois</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-lg">⚡ Fonctionnalités clés</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Wi-Fi:</strong> Impression mobile</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>ADF:</strong> Scan multi-pages auto</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                      <span><strong>Duplex:</strong> Impression R/V auto</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="py-16 bg-gradient-subtle">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-4">
-                Ce que disent nos clients
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Plus de 2000 clients satisfaits depuis 2019
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className="flex items-center mb-4">
-                    <div className="flex text-warning">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    "Service exceptionnel ! Installation rapide à domicile et formation complète. 
-                    Mon Canon EcoTank fonctionne parfaitement depuis 6 mois."
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary">RM</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Rakoto Michel</p>
-                      <p className="text-xs text-muted-foreground">Antananarivo</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className="flex items-center mb-4">
-                    <div className="flex text-warning">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    "Livraison ultra rapide à Antsirabe ! Imprimante laser parfaite pour mon bureau. 
-                    Support technique au top quand j'ai eu un souci."
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-success/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-success">SA</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Sophie Andriana</p>
-                      <p className="text-xs text-muted-foreground">Antsirabe</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-medium transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className="flex items-center mb-4">
-                    <div className="flex text-warning">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    "Conseils d'expert pour choisir la bonne imprimante. Prix compétitifs et 
-                    garantie respectée. Je recommande vivement !"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-accent">JR</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Jean Claude Rasolofo</p>
-                      <p className="text-xs text-muted-foreground">Mahajanga</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="text-center mt-8">
-              <Button onClick={handleCall} className="btn-hero">
-                <Phone className="h-4 w-4 mr-2" />
-                Rejoignez nos clients satisfaits !
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Brands Section */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-4">
-                Nos Partenaires de Confiance
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Nous travaillons avec les plus grandes marques mondiales
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
-              <Card className="text-center p-6 hover:shadow-medium transition-all duration-300">
-                <div className="h-16 flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-red-600">Canon</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Leader mondial</p>
-                <p className="text-xs text-muted-foreground">Qualité professionnelle</p>
-              </Card>
-              
-              <Card className="text-center p-6 hover:shadow-medium transition-all duration-300">
-                <div className="h-16 flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-blue-600">HP</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Innovation & Fiabilité</p>
-                <p className="text-xs text-muted-foreground">Technologies avancées</p>
-              </Card>
-              
-              <Card className="text-center p-6 hover:shadow-medium transition-all duration-300">
-                <div className="h-16 flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-blue-800">Epson</span>
-                </div>
-                <p className="text-sm text-muted-foreground">EcoTank Révolutionnaire</p>
-                <p className="text-xs text-muted-foreground">Économies d'encre</p>
-              </Card>
-              
-              <Card className="text-center p-6 hover:shadow-medium transition-all duration-300">
-                <div className="h-16 flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-gray-800">Brother</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Robustesse Garantie</p>
-                <p className="text-xs text-muted-foreground">Usage intensif</p>
-              </Card>
-            </div>
-            
-            <div className="text-center mt-8">
-              <div className="bg-gradient-subtle p-6 rounded-lg max-w-4xl mx-auto">
-                <h3 className="text-xl font-semibold mb-4">🏆 Distributeur Officiel Agréé</h3>
-                <p className="text-muted-foreground">
-                  En tant que partenaire officiel, nous garantissons l'authenticité de tous nos produits 
-                  et respectons les standards de qualité internationaux. Garantie constructeur complète incluse.
-                </p>
+            <div className="hidden sm:block">
+              <div className="mb-10 text-center">
+                <h2 className="mb-3 text-3xl font-bold text-primary">Pourquoi choisir Tsena Imprimante ?</h2>
+                <p className="text-lg text-muted-foreground">Neuf sous carton, installé chez vous, garanti.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+                {AVANTAGES.map((a) => (
+                  <Card key={a.titre} className="text-center transition-all duration-300 hover:shadow-medium">
+                    <CardContent className="pt-6">
+                      <a.icone className={`mx-auto mb-4 h-8 w-8 ${a.couleur}`} aria-hidden="true" />
+                      <h3 className="mb-2 font-semibold">
+                        {a.titre} {a.detail}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{a.texte}</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Service Guarantee */}
-        <section className="py-16 bg-primary text-primary-foreground">
+        {/* Les produits, tout de suite */}
+        <ProductCatalog />
+
+        {/* Quel type choisir : trois lignes, prix calculés sur le catalogue */}
+        <section className="bg-background py-6 sm:py-16">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Notre Engagement Service</h2>
-              <p className="text-xl opacity-90">Des garanties qui vous protègent vraiment</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20 transition-all">
-                <CardContent className="pt-6 text-center">
-                  <Shield className="h-12 w-12 mx-auto mb-4 text-success" />
-                  <h3 className="font-semibold mb-2">Garantie 1 An</h3>
-                  <p className="text-sm opacity-90">Garantie constructeur complète + support technique gratuit</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20 transition-all">
-                <CardContent className="pt-6 text-center">
-                  <Truck className="h-12 w-12 mx-auto mb-4 text-accent" />
-                  <h3 className="font-semibold mb-2">Livraison Sécurisée</h3>
-                  <p className="text-sm opacity-90">Emballage professionnel et assurance transport</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20 transition-all">
-                <CardContent className="pt-6 text-center">
-                  <Phone className="h-12 w-12 mx-auto mb-4 text-warning" />
-                  <h3 className="font-semibold mb-2">Support 24/7</h3>
-                  <p className="text-sm opacity-90">Assistance technique par téléphone, même le weekend</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20 transition-all">
-                <CardContent className="pt-6 text-center">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-4 text-success" />
-                  <h3 className="font-semibold mb-2">Satisfaction 100%</h3>
-                  <p className="text-sm opacity-90">30 jours pour changer d'avis, remboursement intégral</p>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="text-center mt-12">
-              <Button onClick={handleCall} className="btn-call bg-white text-primary hover:bg-gray-100">
-                <Phone className="h-4 w-4 mr-2" />
-                Découvrez tous nos services
-              </Button>
+            <h2 className="text-xl font-extrabold text-primary sm:text-center sm:text-3xl">
+              Quel type choisir ?
+            </h2>
+            <p className="mt-1 text-[12.5px] text-muted-foreground sm:mt-3 sm:text-center sm:text-lg">
+              Trois familles, trois usages. Notre guide compare le coût par page.
+            </p>
+
+            <div className="mt-3 flex flex-col gap-2 sm:mt-10 sm:grid sm:grid-cols-3 sm:gap-6">
+              {TYPES.map((t) => (
+                <Link
+                  key={t.titre}
+                  to="/conseils"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary sm:flex-col sm:items-start sm:gap-3 sm:p-6"
+                >
+                  <span className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg sm:h-12 sm:w-12 ${t.teinte}`}>
+                    <t.icone className="h-[19px] w-[19px] sm:h-6 sm:w-6" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[14.5px] font-bold text-foreground sm:text-xl">{t.titre}</span>
+                    <span className="block text-[11.5px] leading-snug text-muted-foreground sm:text-base">
+                      {t.texte} · dès {t.prix}
+                    </span>
+                  </span>
+                  <ChevronRight className="h-[18px] w-[18px] shrink-0 text-muted-foreground sm:hidden" aria-hidden="true" />
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        <Suspense fallback={<SectionFallback id="contact" className="py-20 min-h-[600px]" />}>
+        {/* Devis proforma : replié sur téléphone, déplié sur écran large */}
+        <SectionDevis />
+
+        {/* Ce que nous pouvons prouver — et rien de plus */}
+        <section className="bg-gradient-subtle py-6 sm:py-14">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-3 gap-2 sm:mx-auto sm:max-w-3xl sm:gap-6">
+              <div className="rounded-xl border border-border bg-card p-3 text-center sm:p-6">
+                <div className="text-xl font-extrabold leading-none text-primary sm:text-4xl">7 779</div>
+                <div className="mt-1.5 text-[10.5px] leading-tight text-muted-foreground sm:mt-2 sm:text-sm">
+                  abonnés sur notre page Facebook
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-3 text-center sm:p-6">
+                <div className="text-xl font-extrabold leading-none text-primary sm:text-4xl">{products.length}</div>
+                <div className="mt-1.5 text-[10.5px] leading-tight text-muted-foreground sm:mt-2 sm:text-sm">
+                  modèles disponibles
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-3 text-center sm:p-6">
+                <div className="text-xl font-extrabold leading-none text-success sm:text-4xl">24-48 h</div>
+                <div className="mt-1.5 text-[10.5px] leading-tight text-muted-foreground sm:mt-2 sm:text-sm">
+                  livraison à Antananarivo
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap justify-center gap-x-4 text-center text-[12px] sm:mt-8 sm:text-sm">
+              <Link to="/aide" className="inline-flex min-h-[44px] items-center font-semibold text-primary hover:underline">
+                Aide &amp; dépannage
+              </Link>
+              <Link to="/conseils" className="inline-flex min-h-[44px] items-center font-semibold text-primary hover:underline">
+                Bien choisir
+              </Link>
+              <Link to="/faq" className="inline-flex min-h-[44px] items-center font-semibold text-primary hover:underline">
+                Questions fréquentes
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <Suspense fallback={<SectionFallback id="contact" className="min-h-[400px]" />}>
           <ContactSection />
         </Suspense>
       </main>
-      <Suspense fallback={<SectionFallback className="min-h-[300px] bg-primary" />}>
+      <Suspense fallback={<SectionFallback className="min-h-[300px]" />}>
         <Footer />
       </Suspense>
     </div>

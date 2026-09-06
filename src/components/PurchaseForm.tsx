@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, MapPin, User, Phone, Mail } from "lucide-react";
 import { Product } from "@/data/products";
 import { useToast } from "@/hooks/use-toast";
+import { CONTACT, lienWhatsApp, appeler } from "@/config/contact";
+import { envoyerLead, telephoneValide } from "@/lib/leads";
+import { evenement } from "@/lib/mesure";
 
 interface PurchaseFormProps {
   product: Product;
@@ -32,6 +35,12 @@ const PurchaseForm = ({ product, isOpen, onClose }: PurchaseFormProps) => {
     notes: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmation, setConfirmation] = useState<{ reference: string; message: string } | null>(null);
+  const [pieges, setPieges] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) setConfirmation(null);
+  }, [isOpen]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -68,7 +77,7 @@ const PurchaseForm = ({ product, isOpen, onClose }: PurchaseFormProps) => {
 
     if (formData.deliveryType === "delivery" && (!formData.address || !formData.city)) {
       toast({
-        title: "Erreur", 
+        title: "Erreur",
         description: "Veuillez renseigner l'adresse de livraison",
         variant: "destructive",
       });
@@ -76,97 +85,74 @@ const PurchaseForm = ({ product, isOpen, onClose }: PurchaseFormProps) => {
       return;
     }
 
-    // Préparation du message pour Facebook
-    const deliveryInfo = formData.deliveryType === "delivery" 
-      ? `Livraison à: ${formData.address}, ${formData.city}${formData.district ? ", " + formData.district : ""}`
-      : "Retrait en magasin";
+    if (!telephoneValide(formData.phone)) {
+      toast({
+        title: "Numéro invalide",
+        description: "Un numéro malgache : 032, 033, 034, 037 ou 038 suivi de 7 chiffres.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
-    // Calcul du prix selon l'option choisie
+    const deliveryInfo = formData.deliveryType === "delivery"
+      ? `Livraison : ${formData.address}, ${formData.city}${formData.district ? ", " + formData.district : ""}`
+      : "Retrait (lieu et heure à convenir)";
+
     let selectedPrice = product.priceMin;
     let priceLabel = "";
-    
     if (product.priceMax && formData.priceOption) {
       if (formData.priceOption === "simple") {
         selectedPrice = product.priceMin;
-        priceLabel = " (Prix simple)";
+        priceLabel = "sans kit";
       } else if (formData.priceOption === "withKit") {
         selectedPrice = product.priceMax;
-        priceLabel = " (Avec kit externe)";
+        priceLabel = "avec kit externe";
       }
     }
 
-    const message = `🛒 NOUVELLE COMMANDE
+    // Audit 06/09/2026 : la commande est d'abord ENREGISTRÉE au serveur
+    // (api/lead.php → e-mail + Telegram), puis WhatsApp est proposé comme
+    // second canal. Avant, seul un onglet WhatsApp s'ouvrait (vers un numéro
+    // absent de la page Facebook) et le site affichait « Message envoyé ».
+    const resultat = await envoyerLead(
+      {
+        type: "commande",
+        nom: `${formData.firstName} ${formData.lastName}`.trim(),
+        telephone: formData.phone,
+        email: formData.email,
+        message: formData.notes,
+        produits: [{ id: product.id, nom: product.name, quantite: 1, prix: selectedPrice, option: priceLabel }],
+        livraison: deliveryInfo,
+        total: selectedPrice,
+      },
+      pieges
+    );
+    setIsSubmitting(false);
 
-📱 Produit: ${product.name} (${product.brand})
-💰 Prix: ${selectedPrice.toLocaleString()} MGA${priceLabel}
+    const message = [
+      "NOUVELLE COMMANDE (site web)",
+      resultat.id ? `Référence : ${resultat.id}` : "",
+      `Produit : ${product.name} (${product.brand})`,
+      `Prix : ${selectedPrice.toLocaleString("fr-FR")} Ar${priceLabel ? " " + priceLabel : ""}`,
+      `Client : ${formData.firstName} ${formData.lastName}`,
+      `Téléphone : ${formData.phone}`,
+      formData.email ? `E-mail : ${formData.email}` : "",
+      deliveryInfo,
+      formData.notes ? `Notes : ${formData.notes}` : "",
+    ].filter(Boolean).join("\n");
 
-👤 Client:
-Nom: ${formData.firstName} ${formData.lastName}
-Téléphone: ${formData.phone}
-${formData.email ? `Email: ${formData.email}` : ''}
-
-🚚 ${deliveryInfo}
-
-${formData.notes ? `📝 Notes: ${formData.notes}` : ''}
-
----
-Commande passée via le site web TSENA`;
-
-    try {
-      // Détecter si on est sur mobile ou desktop
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        // Sur mobile : envoyer via WhatsApp
-        const whatsappNumber = "261327209033";
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-        
-        window.open(whatsappUrl, '_blank');
-        
-        toast({
-          title: "Message envoyé !",
-          description: "Votre commande a été envoyée via WhatsApp. Nous vous contacterons rapidement.",
-        });
-      } else {
-        // Sur PC : envoyer par email
-        const emailSubject = encodeURIComponent(`Nouvelle commande - ${product.name}`);
-        const emailBody = encodeURIComponent(message);
-        
-        window.open(`mailto:tsenaimprimante@gmail.com?subject=${emailSubject}&body=${emailBody}`, '_blank');
-        
-        toast({
-          title: "Email ouvert !",
-          description: "Votre client email s'est ouvert avec la commande. Envoyez l'email pour finaliser.",
-        });
-      }
-
-      // Reset du formulaire
-      setFormData({
-        firstName: "",
-        lastName: "",
-        phone: "",
-        email: "",
-        deliveryType: "",
-        priceOption: "",
-        address: "",
-        city: "",
-        district: "",
-        notes: ""
-      });
-
-      onClose();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Erreur lors de l'envoi:", error);
-      }
+    if (resultat.ok) {
+      evenement("commande_envoyee", { produit: product.id });
+      setConfirmation({ reference: resultat.id || "ok", message });
+    } else {
+      evenement("formulaire_erreur", { f: "commande", e: resultat.erreur });
       toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer la commande. Veuillez réessayer.",
+        title: "Enregistrement impossible pour le moment",
+        description: "Envoyez votre commande sur WhatsApp avec le bouton ci-dessous, ou appelez-nous.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      setConfirmation({ reference: "", message });
     }
   };
 
@@ -180,7 +166,40 @@ Commande passée via le site web TSENA`;
           </DialogTitle>
         </DialogHeader>
 
+        {confirmation ? (
+          <div className="space-y-4" role="status" aria-live="polite">
+            {confirmation.reference ? (
+              <>
+                <h3 className="text-xl font-semibold text-success">Commande bien reçue — misaotra !</h3>
+                <p className="text-muted-foreground">
+                  Référence <strong>{confirmation.reference}</strong>. Nous vous appelons pour confirmer la
+                  disponibilité, le paiement et la livraison. Aucun paiement n'est demandé en ligne.
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl font-semibold">Votre commande est prête à envoyer</h3>
+                <p className="text-muted-foreground">Le serveur n'a pas répondu : envoyez-la sur WhatsApp, elle nous arrive directement.</p>
+              </>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button asChild className="btn-call">
+                <a href={lienWhatsApp(confirmation.message)} target="_blank" rel="noopener noreferrer" onClick={() => evenement("clic_whatsapp", { ou: "commande" })}>
+                  Continuer sur WhatsApp
+                </a>
+              </Button>
+              <Button variant="outline" onClick={() => { evenement("clic_appel", { ou: "commande" }); appeler(); }}>
+                Appeler le {CONTACT.telephonePrincipal.affichage}
+              </Button>
+              <Button variant="ghost" onClick={() => { setConfirmation(null); onClose(); }}>Fermer</Button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
+            <label htmlFor="site_web_commande">Ne pas remplir</label>
+            <input id="site_web_commande" name="site_web" type="text" tabIndex={-1} autoComplete="off" value={pieges} onChange={(e) => setPieges(e.target.value)} />
+          </div>
           {/* Informations produit */}
           <Card>
             <CardHeader>
@@ -204,7 +223,7 @@ Commande passée via le site web TSENA`;
                   <h3 className="font-semibold">{product.name}</h3>
                   <p className="text-sm text-muted-foreground">{product.brand}</p>
                   <p className="text-lg font-bold text-primary">
-                    {product.priceMax 
+                    {product.priceMax
                       ? `${product.priceMin.toLocaleString()} - ${product.priceMax.toLocaleString()} MGA`
                       : `À partir de ${product.priceMin.toLocaleString()} MGA`
                     }
@@ -293,7 +312,9 @@ Commande passée via le site web TSENA`;
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="Votre numéro de téléphone"
+                  placeholder="034 XX XXX XX"
+                  inputMode="tel"
+                  autoComplete="tel"
                   required
                 />
               </div>
@@ -325,7 +346,7 @@ Commande passée via le site web TSENA`;
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="pickup" id="pickup" />
-                  <Label htmlFor="pickup">Retrait en magasin (gratuit)</Label>
+                  <Label htmlFor="pickup">Retrait (lieu et heure convenus par téléphone)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="delivery" id="delivery" />
@@ -404,10 +425,11 @@ Commande passée via le site web TSENA`;
               disabled={isSubmitting}
               className="flex-1"
             >
-              {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
+              {isSubmitting ? "Envoi en cours..." : "Envoyer la commande"}
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

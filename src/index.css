@@ -33,7 +33,7 @@ All colors MUST be HSL for perfect theming.
     --secondary-foreground: 210 22% 15%;
 
     /* Accent: Energetic Orange (darkened for WCAG AA text contrast, 4.6:1 on white) */
-    --accent: 25 95% 39%;
+    --accent: 25 95% 35%;
     --accent-foreground: 0 0% 100%;
     --accent-light: 25 95% 65%;
     --accent-dark: 25 95% 32%;
@@ -50,7 +50,7 @@ All colors MUST be HSL for perfect theming.
     --ring: 210 85% 35%;
 
     /* Success Green for positive actions (darkened for WCAG AA text contrast, ~5:1 on white) */
-    --success: 145 65% 30%;
+    --success: 145 65% 27%;
     --success-foreground: 0 0% 100%;
     
     /* Warning for important notices */
@@ -139,7 +139,7 @@ All colors MUST be HSL for perfect theming.
   }
   
   .btn-call {
-    @apply bg-success text-success-foreground font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105;
+    @apply !bg-success !text-success-foreground font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-300 hover:!bg-success/90 hover:shadow-lg hover:scale-105;
   }
   
   .btn-secondary {

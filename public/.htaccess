@@ -1,0 +1,81 @@
+# Tsena Imprimante — configuration Apache (o2switch)
+# Audit pre-lancement du 06/09/2026. Copie dans dist/ par Vite (public/), envoye
+# EN DERNIER par ftp_deploy_atomique.py.
+#
+# Ce fichier remplace la reecriture « tout vers index.html » qui rendait 200 pour
+# n'importe quelle URL (soft 404) et masquait les fichiers absents (o2switch
+# servait index.html en text/html a la place d'un .js manquant).
+
+Options -Indexes -MultiViews
+AddDefaultCharset UTF-8
+DirectorySlash Off
+
+AddType application/json .json
+AddType application/manifest+json .webmanifest
+AddType text/plain .txt
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. www -> sans www (une seule URL canonique)
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+  # 2. HTTPS obligatoire
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # 3. /index.html -> /
+  RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+  RewriteRule ^index\.html$ / [R=301,L]
+
+  # 4. Barre finale -> sans barre (sauf la racine) : /faq/ -> /faq
+  RewriteCond %{REQUEST_URI} ^(.+)/$
+  RewriteRule ^ %1 [R=301,L]
+
+  # 5. Route pre-rendue : /faq -> /faq/index.html, sans redirection
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.+)$ /$1/index.html [L]
+
+  # 6. Tout le reste : fichier existant servi tel quel, sinon vrai 404 (ErrorDocument)
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# Fichiers qui ne doivent jamais etre servis
+<FilesMatch "^(_commun\.php|config\.exemple\.php|\.env.*|.*\.(jsonl|log|bak|sql))$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  # Securite (audit : aucun de ces en-tetes n'etait present)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+  # CSP : le site ne charge rien d'externe. 'unsafe-inline' sur style-src seulement
+  # (attributs style de React, feuille injectee par Sonner). blob: pour le PDF (jsPDF).
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+
+  # Cache : les bundles portent un hash -> un an, immutable
+  <FilesMatch "\.(js|mjs|css|woff2?|ttf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(webp|png|jpe?g|svg|ico|avif)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  # Les pages HTML et le catalogue se revalident a chaque visite
+  <FilesMatch "\.(html|json|xml|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+</IfModule>
+
+# Compression (o2switch active deja brotli ; ceci couvre les types texte au cas ou)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/json application/javascript application/xml image/svg+xml
+</IfModule>

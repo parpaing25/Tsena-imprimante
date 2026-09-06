@@ -12,6 +12,7 @@ const Header = () => {
     { name: "Conseils", href: "/conseils" },
     { name: "Blog", href: "/blog" },
     { name: "FAQ", href: "/faq" },
+    { name: "Aide", href: "/aide" },
     { name: "Contact", href: "/#contact" },
   ];
 
@@ -41,9 +42,10 @@ const Header = () => {
               <img src="/logo.webp" alt="Tsena Imprimante" width="32" height="32" decoding="async" className="h-6 w-6 sm:h-8 sm:w-8 object-contain" />
             </div>
             <div className="hidden sm:block min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300">
+              {/* Audit 06/09/2026 : pas de <h1> dans l'en-tete — chaque page porte le sien. */}
+              <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300">
                 Tsena Imprimante
-              </h1>
+              </p>
               <p className="text-xs text-muted-foreground hidden sm:block">eto Madagasikara</p>
             </div>
           </div>
@@ -64,7 +66,7 @@ const Header = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            <Button 
+            <Button
               onClick={handleProforma}
               className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-accent-foreground text-xs px-2 py-1 h-8 shadow-medium"
               size="sm"
@@ -73,8 +75,8 @@ const Header = () => {
               <span className="hidden sm:inline">Proforma</span>
               <span className="sm:hidden">PDF</span>
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={handleCall}
               className="btn-call text-xs px-2 py-1 h-8"
               size="sm"
@@ -117,7 +119,7 @@ const Header = () => {
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Facebook Messenger
                     </Button>
-                    <Button onClick={handleFacebook} variant="outline" className="w-full bg-[#1877f2] text-white border-[#1877f2] hover:bg-[#166fe5]">
+                    <Button onClick={handleFacebook} variant="outline" className="w-full bg-[#1565c0] text-white border-[#1877f2] hover:bg-[#0d47a1]">
                       <Facebook className="h-4 w-4 mr-2" />
                       Page Facebook
                     </Button>

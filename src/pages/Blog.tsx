@@ -128,7 +128,7 @@ const Blog = () => {
               size="lg"
             >
               <HelpCircle className="h-5 w-5 mr-2" />
-              Forum d'Entraide
+              Aide & dépannage
             </Button>
             <Button 
               variant="outline"

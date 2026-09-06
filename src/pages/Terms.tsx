@@ -47,7 +47,7 @@ const Terms = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>1. Présentation du Service</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">1. Présentation du Service</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
@@ -66,7 +66,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>2. Commandes et Paiement</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">2. Commandes et Paiement</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <h4 className="font-semibold">Processus de Commande</h4>
@@ -89,7 +89,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>3. Livraison et Installation</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">3. Livraison et Installation</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <h4 className="font-semibold">Délais de Livraison</h4>
@@ -118,7 +118,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>4. Garanties et SAV</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">4. Garanties et SAV</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <h4 className="font-semibold">Garantie Produits</h4>
@@ -141,7 +141,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>5. Retours et Remboursements</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">5. Retours et Remboursements</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-muted-foreground">
@@ -156,7 +156,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>6. Responsabilités</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">6. Responsabilités</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <h4 className="font-semibold">Nos Engagements</h4>
@@ -178,7 +178,7 @@ const Terms = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>7. Contact et Litiges</CardTitle>
+                <h2 className="text-xl font-semibold leading-none tracking-tight">7. Contact et Litiges</h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">

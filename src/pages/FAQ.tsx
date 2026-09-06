@@ -6,6 +6,22 @@ import { Phone, MessageCircle, HelpCircle, Wrench, Truck, CreditCard } from "luc
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+// Audit 06/09/2026 : données structurées FAQPage (extraits enrichis Google, moteurs de réponse IA).
+const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    { "@type": "Question", name: "Comment passer commande ?", acceptedAnswer: { "@type": "Answer", text: "Sur le site via le bouton Acheter, par téléphone au 033 71 063 34, par WhatsApp ou Facebook Messenger. Chaque commande est confirmée par un appel." } },
+    { "@type": "Question", name: "Quels sont les modes de paiement ?", acceptedAnswer: { "@type": "Answer", text: "Espèces à la livraison ou au retrait, virement bancaire, Mobile Money (MVola, Orange Money). Aucun paiement n'est demandé en ligne." } },
+    { "@type": "Question", name: "Y a-t-il des frais de livraison ?", acceptedAnswer: { "@type": "Answer", text: "Livraison et installation gratuites à Antananarivo. En province, frais selon la ville et le poids (taxi-brousse ou avion), indiqués sur le devis avant validation." } },
+    { "@type": "Question", name: "Quels sont les délais de livraison ?", acceptedAnswer: { "@type": "Answer", text: "Antananarivo : 24 à 48 h selon disponibilité. Antsirabe : 2 à 3 jours. Autres régions : 3 à 7 jours." } },
+    { "@type": "Question", name: "L'installation est-elle comprise ?", acceptedAnswer: { "@type": "Answer", text: "Oui, gratuite à Antananarivo : branchement, Wi-Fi, pilotes sur ordinateur ou téléphone, premier test d'impression. Ailleurs, assistance téléphonique gratuite." } },
+    { "@type": "Question", name: "Les imprimantes sont-elles garanties ?", acceptedAnswer: { "@type": "Answer", text: "Toutes les imprimantes sont neuves sous carton avec garantie constructeur et SAV. La durée exacte dépend du modèle et figure sur le devis." } },
+    { "@type": "Question", name: "Vendez-vous les encres et consommables ?", acceptedAnswer: { "@type": "Answer", text: "Oui : bouteilles, cartouches et toners pour les imprimantes vendues. Indiquez le modèle, nous donnons la référence et le prix." } },
+    { "@type": "Question", name: "Jet d'encre, laser ou réservoir : que choisir ?", acceptedAnswer: { "@type": "Answer", text: "Jet d'encre pour de petits volumes couleur ; laser pour le noir et blanc rapide et les gros volumes ; réservoir (Canon série G, Epson EcoTank) pour la couleur au coût par page le plus bas." } },
+  ],
+};
+
 const FAQ = () => {
   const handleCall = () => {
     window.location.href = "tel:+261337106334";
@@ -21,9 +37,10 @@ const FAQ = () => {
         <title>FAQ - Questions Fréquentes | Tsena Imprimante Madagascar</title>
         <meta name="description" content="Réponses aux questions fréquentes sur l'achat, la livraison, la garantie et l'installation d'imprimantes Canon, HP, Epson à Madagascar." />
         <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/faq" />
+        <script type="application/ld+json">{JSON.stringify(FAQ_JSONLD)}</script>
       </Helmet>
       <Header />
-      
+
       <main className="py-16">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
@@ -33,7 +50,7 @@ const FAQ = () => {
               Questions Fréquentes
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Retrouvez toutes les réponses à vos questions sur nos imprimantes, 
+              Retrouvez toutes les réponses à vos questions sur nos imprimantes,
               nos services et notre support technique.
             </p>
           </div>
@@ -41,8 +58,9 @@ const FAQ = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* FAQ Content */}
             <div className="lg:col-span-2">
+              <h2 className="sr-only">Questions par thème</h2>
               <Accordion type="single" collapsible className="space-y-4">
-                
+
                 {/* Commandes et Achats */}
                 <Card>
                   <AccordionItem value="commande" className="border-none">
@@ -57,23 +75,23 @@ const FAQ = () => {
                         <div>
                           <h4 className="font-semibold mb-2">Comment passer commande ?</h4>
                           <p className="text-muted-foreground">
-                            Vous pouvez commander directement sur le site via le bouton "Acheter", 
-                            nous contacter par téléphone au 033 71 063 34, ou via Facebook Messenger. 
+                            Vous pouvez commander directement sur le site via le bouton "Acheter",
+                            nous contacter par téléphone au 033 71 063 34, ou via Facebook Messenger.
                             Chaque commande est traitée personnellement.
                           </p>
                         </div>
                         <div>
                           <h4 className="font-semibold mb-2">Quels sont les modes de paiement ?</h4>
                           <p className="text-muted-foreground">
-                            Nous acceptons les paiements en espèces (à la livraison ou au retrait), 
-                            virement bancaire, et Mobile Money (MVola, Orange Money). 
+                            Nous acceptons les paiements en espèces (à la livraison ou au retrait),
+                            virement bancaire, et Mobile Money (MVola, Orange Money).
                             Le paiement peut se faire à la commande ou à la livraison.
                           </p>
                         </div>
                         <div>
                           <h4 className="font-semibold mb-2">Y a-t-il des frais de livraison ?</h4>
                           <p className="text-muted-foreground">
-                            La livraison est gratuite à Antananarivo. Pour les autres régions, 
+                            La livraison est gratuite à Antananarivo. Pour les autres régions,
                             les frais varient selon la distance. Contactez-nous pour un devis précis.
                           </p>
                         </div>
@@ -105,15 +123,15 @@ const FAQ = () => {
                         <div>
                           <h4 className="font-semibold mb-2">Installation et configuration</h4>
                           <p className="text-muted-foreground">
-                            Installation gratuite sur Antananarivo ! Nous configurons votre imprimante, 
-                            installons les drivers, et vous formons à son utilisation. 
+                            Installation gratuite sur Antananarivo ! Nous configurons votre imprimante,
+                            installons les drivers, et vous formons à son utilisation.
                             Pour les autres régions, support téléphonique gratuit.
                           </p>
                         </div>
                         <div>
                           <h4 className="font-semibold mb-2">Que faire si l'imprimante arrive endommagée ?</h4>
                           <p className="text-muted-foreground">
-                            Contactez-nous immédiatement ! Nous remplaçons gratuitement tout produit 
+                            Contactez-nous immédiatement ! Nous remplaçons gratuitement tout produit
                             endommagé pendant le transport. Photos requises pour traitement rapide.
                           </p>
                         </div>
@@ -136,8 +154,7 @@ const FAQ = () => {
                         <div>
                           <h4 className="font-semibold mb-2">Garantie des produits</h4>
                           <p className="text-muted-foreground">
-                            • Canon, HP, Epson : 1 an garantie constructeur<br/>
-                            • Brother : 1 an garantie constructeur<br/>
+                            • Canon, HP, Epson : garantie constructeur (durée précisée sur le devis, selon le modèle)<br/>
                             • Support technique gratuit pendant toute la durée de vie du produit<br/>
                             La garantie couvre les défauts de fabrication, pas l'usure normale.
                           </p>
@@ -179,8 +196,8 @@ const FAQ = () => {
                         <div>
                           <h4 className="font-semibold mb-2">Où acheter les cartouches et encres ?</h4>
                           <p className="text-muted-foreground">
-                            Nous vendons toutes les cartouches et encres compatibles avec nos imprimantes. 
-                            Contactez-nous pour vérifier la disponibilité et les prix. 
+                            Nous vendons toutes les cartouches et encres compatibles avec nos imprimantes.
+                            Contactez-nous pour vérifier la disponibilité et les prix.
                             Livraison possible dans toute l'île.
                           </p>
                         </div>
@@ -195,8 +212,8 @@ const FAQ = () => {
                         <div>
                           <h4 className="font-semibold mb-2">Quand changer les cartouches ?</h4>
                           <p className="text-muted-foreground">
-                            Changez dès que l'imprimante indique un niveau bas ou que la qualité 
-                            d'impression diminue. Ne laissez jamais l'imprimante sans encre longtemps, 
+                            Changez dès que l'imprimante indique un niveau bas ou que la qualité
+                            d'impression diminue. Ne laissez jamais l'imprimante sans encre longtemps,
                             cela peut endommager les têtes d'impression.
                           </p>
                         </div>
