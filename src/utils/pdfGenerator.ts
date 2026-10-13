@@ -13,7 +13,11 @@ function numberToWords(num: number): string {
 
   if (num === 0) return 'zéro';
 
-  function convertHundreds(n: number): string {
+  // `pluriel` : « cent » et « quatre-vingt » prennent un s quand rien ne les suit, en fin de
+  // nombre ou devant « millions »/« milliards » (des noms), jamais devant « mille » (un
+  // adjectif numéral) : deux cents, deux cents millions, mais deux cent mille ;
+  // quatre-vingts, quatre-vingts millions, mais quatre-vingt mille (13/10/2026).
+  function convertHundreds(n: number, pluriel: boolean): string {
     let result = '';
 
     if (n >= 100) {
@@ -21,7 +25,7 @@ function numberToWords(num: number): string {
       if (hundreds === 1) {
         result += 'cent';
       } else {
-        result += units[hundreds] + ' cent';
+        result += units[hundreds] + ' cent' + (n % 100 === 0 && pluriel ? 's' : '');
       }
       if (n % 100 !== 0) result += ' ';
     }
@@ -36,14 +40,18 @@ function numberToWords(num: number): string {
       // dans `teens`, jamais dans `units`. L'ancien code faisait units[unitsDigit + 10], hors
       // du tableau : tout total tombant sur 71-79 ou 91-99 sortait « quatre-vingt-undefined »
       // (mesuré le 13/10/2026 sur 3 295 000 Ar, un panier banal).
+      // « et » devant un et onze après vingt, trente… soixante : vingt et un, soixante et
+      // onze ; jamais après quatre-vingt : quatre-vingt-un, quatre-vingt-onze.
       if (tensDigit === 7 || tensDigit === 9) {
         result += tensDigit === 7 ? 'soixante' : 'quatre-vingt';
-        result += '-' + teens[unitsDigit];
+        result += (tensDigit === 7 && unitsDigit === 1 ? ' et ' : '-') + teens[unitsDigit];
       } else if (tensDigit === 8 && unitsDigit === 0) {
-        result += 'quatre-vingts';   // « quatre-vingts » prend un s quand rien ne suit
+        result += pluriel ? 'quatre-vingts' : 'quatre-vingt';
       } else {
         result += tens[tensDigit];
-        if (unitsDigit > 0) {
+        if (unitsDigit === 1 && tensDigit !== 8) {
+          result += ' et un';
+        } else if (unitsDigit > 0) {
           result += '-' + units[unitsDigit];
         }
       }
@@ -63,7 +71,7 @@ function numberToWords(num: number): string {
     const chunk = num % 1000;
     if (chunk !== 0) {
       // « mille » est invariable et ne se dit pas « un mille » ; million et milliard prennent un s.
-      let chunkText = scaleIndex === 1 && chunk === 1 ? '' : convertHundreds(chunk);
+      let chunkText = scaleIndex === 1 && chunk === 1 ? '' : convertHundreds(chunk, scaleIndex !== 1);
       if (scaleIndex > 0) {
         const echelle = scales[scaleIndex] + (scaleIndex >= 2 && chunk > 1 ? 's' : '');
         chunkText = (chunkText ? chunkText + ' ' : '') + echelle;
