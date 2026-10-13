@@ -141,14 +141,17 @@ const HeroSection = () => {
                   {featuredProducts.map((product) => (
                     <CarouselItem key={product.id}>
                       <div className="flex flex-col items-center space-y-3 p-2 text-center text-white">
+                        {/* 13/10/2026, Andry : l'image (288 × 160 fixes) paraissait perdue dans la carte.
+                            Elle suit maintenant la largeur de la carte, au format 16:9 des photos
+                            (toutes en 800 × 450), en laissant de la place aux flèches. */}
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          width={272}
-                          height={160}
+                          width={800}
+                          height={450}
                           loading="lazy"
                           decoding="async"
-                          className="mb-3 h-40 w-72 cursor-pointer rounded-3xl object-contain shadow-xl transition-all duration-300 hover:scale-105"
+                          className="mb-3 aspect-video h-auto w-[78%] max-w-[30rem] cursor-pointer rounded-3xl object-contain shadow-xl transition-all duration-300 hover:scale-105"
                           onClick={() => handleImageClick(product.imageUrl, product.name)}
                           onError={(e) => {
                             e.currentTarget.src = "/placeholder.svg";
