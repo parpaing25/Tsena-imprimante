@@ -11,8 +11,10 @@
  * bible du bot vendeur (bot-imprimante/bible/bible-imprimante.json : WhatsApp
  * wa.me/261337106334).
  *
- * ⚠ À CONFIRMER par Andry : le numéro WhatsApp. Hypothèse retenue : le même
- * numéro que celui affiché pour les appels (033 71 063 34), comme dans la bible.
+ * ✅ WhatsApp CONFIRMÉ par Andry le 13/10/2026 : 032 72 090 33. L'hypothèse du
+ * 06/09 (le 033 71 063 34 des appels, repris de la bible) était fausse, et le
+ * 13/10 au matin ce bon numéro avait même été retiré de la page Conseils sur la
+ * foi de cette hypothèse. Le numéro d'appel reste le 033 71 063 34.
  */
 export const CONTACT = {
   nom: "Tsena Imprimante",
@@ -20,7 +22,8 @@ export const CONTACT = {
   telephonePrincipal: { affichage: "033 71 063 34", e164: "+261337106334" },
   telephoneSecondaire: { affichage: "032 47 041 43", e164: "+261324704143" },
   /** Numéro WhatsApp au format international sans « + » (exigé par l'API WhatsApp). */
-  whatsapp: "261337106334",
+  whatsapp: "261327209033",
+  whatsappAffichage: "032 72 090 33",
   email: "tsenaimprimante@gmail.com",
   messenger: "https://m.me/TsenaImprimante",
   facebook: "https://www.facebook.com/TsenaImprimante",

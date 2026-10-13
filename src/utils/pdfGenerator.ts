@@ -199,7 +199,7 @@ export class PDFGenerator {
 
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8);
-    pdf.text('Tel 033 71 063 34  ·  032 47 041 43  ·  Facebook TsenaImprimante', M, 33);
+    pdf.text('Tel 033 71 063 34  ·  032 47 041 43  ·  WhatsApp 032 72 090 33', M, 33);
     pdf.text('tsenaimprimante.fonenako.mg  ·  Avaradoha, Antananarivo 101', M, 38);
 
     // Titre document (droite, dans la bande)

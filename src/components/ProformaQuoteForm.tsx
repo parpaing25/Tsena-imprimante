@@ -30,6 +30,7 @@ import type { InvoiceData } from "@/utils/pdfGenerator";
 import type jsPDF from 'jspdf';
 import { toast } from "sonner";
 import { CONTACT, lienWhatsApp, appeler } from "@/config/contact";
+import FenetreProforma from "@/components/FenetreProforma";
 import { envoyerLead, telephoneValide } from "@/lib/leads";
 import { evenement } from "@/lib/mesure";
 
@@ -65,6 +66,9 @@ const ProformaQuoteForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedPdf, setGeneratedPdf] = useState<jsPDF | null>(null);
+  // Fenêtre « télécharger / envoyer sur WhatsApp » ouverte à la génération (Andry, 13/10/2026)
+  const [fenetreOuverte, setFenetreOuverte] = useState(false);
+  const [numeroProforma, setNumeroProforma] = useState("");
 
   const regions = deliveryRates.map(rate => rate.region);
 
@@ -177,11 +181,9 @@ const ProformaQuoteForm = () => {
 
     const pdf = PDFGenerator.generateInvoice(invoiceData);
     setGeneratedPdf(pdf);
+    setNumeroProforma(invoiceData.quoteNumber);
+    setFenetreOuverte(true);
     evenement("devis_pdf", { n: formData.selectedProducts.length, total: calculateTotals.total });
-
-    toast.success("Facture proforma générée !", {
-      description: "Vous pouvez maintenant la télécharger ou l'envoyer par WhatsApp."
-    });
 
     // Audit 06/09/2026 : la demande de devis est aussi ENREGISTRÉE côté serveur
     // (avant, elle n'existait que sur l'appareil du client).
@@ -206,7 +208,7 @@ const ProformaQuoteForm = () => {
       // Avant le 13/10/2026 l'échec ne produisait qu'un événement interne : le client repartait
       // avec son PDF en croyant sa demande partie, et personne n'était prévenu.
       evenement("formulaire_erreur", { f: "devis", e: resultat.erreur });
-      toast.error("Votre devis est téléchargé, mais la demande n'a pas pu nous être envoyée.", {
+      toast.error("Votre facture est prête, mais la demande n'a pas pu nous être envoyée.", {
         description: "Envoyez-le-nous sur WhatsApp ou appelez-nous : on vous répond tout de suite.",
         duration: 12000,
         action: {
@@ -219,20 +221,12 @@ const ProformaQuoteForm = () => {
     }
   };
 
-  const downloadPdf = () => {
-    if (generatedPdf) {
-      generatedPdf.save(`Facture-Proforma-${formData.name.replace(/\s+/g, '-')}.pdf`);
-      toast.success("Facture téléchargée !");
-    }
-  };
+  const nomFichierPdf = `Facture-Proforma-${numeroProforma || "Tsena"}-${formData.name.trim().replace(/\s+/g, '-')}.pdf`;
 
-  const sendViaWhatsApp = () => {
-    if (generatedPdf) {
-      // D'abord télécharger le PDF automatiquement
-      generatedPdf.save(`Facture-Proforma-${formData.name.replace(/\s+/g, '-')}.pdf`);
-
-      // Ensuite envoyer le message WhatsApp avec les instructions
-      const message = `Bonjour ! Voici ma demande de devis pour les imprimantes sélectionnées:\n\n` +
+  // Le message qui part avec le PDF vers le WhatsApp de Tsena : il porte le numéro de la
+  // proforma, pour qu'on retrouve la bonne quand le client joint le fichier.
+  const messageWhatsAppDevis = () =>
+    `Bonjour ! Voici ma facture proforma ${numeroProforma} faite sur le site :\n\n` +
         `*DÉTAILS CLIENT:*\n` +
         `Nom: ${formData.name}\n` +
         `Téléphone: ${formData.phone}\n` +
@@ -247,17 +241,8 @@ const ProformaQuoteForm = () => {
         `• Livraison: ${formatPrice(calculateTotals.deliveryPrice)} MGA\n` +
         `• *TOTAL: ${formatPrice(calculateTotals.total)} MGA*\n\n` +
         `*FACTURE PROFORMA:*\n` +
-        `J'ai téléchargé la facture proforma PDF sur mon appareil. Je vais vous l'envoyer dans le prochain message.\n\n` +
+        `Je vous joins le PDF (${nomFichierPdf}).\n\n` +
         `Merci de me confirmer la disponibilité et les modalités de paiement !`;
-
-      handleWhatsApp(message);
-
-      // Notifier l'utilisateur
-      toast.success("PDF téléchargé !", {
-        description: "Le PDF a été téléchargé. Envoyez-le manuellement via WhatsApp après avoir envoyé le message."
-      });
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -573,20 +558,16 @@ const ProformaQuoteForm = () => {
               </Card>
             )}
 
-            {/* Actions PDF */}
+            {/* Actions PDF : rouvrir la fenêtre si on l'a fermée */}
             {generatedPdf && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Facture générée</CardTitle>
+                  <CardTitle>Facture {numeroProforma} générée</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button onClick={downloadPdf} className="w-full" variant="outline">
+                <CardContent className="space-y-3">
+                  <Button onClick={() => setFenetreOuverte(true)} className="w-full min-h-[44px]">
                     <Download className="h-4 w-4 mr-2" />
-                    Télécharger PDF
-                  </Button>
-                  <Button onClick={sendViaWhatsApp} className="w-full bg-green-600 hover:bg-green-700">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Envoyer via WhatsApp
+                    Télécharger ou envoyer sur WhatsApp
                   </Button>
                 </CardContent>
               </Card>
@@ -594,6 +575,16 @@ const ProformaQuoteForm = () => {
           </div>
         </div>
       </div>
+
+      <FenetreProforma
+        ouverte={fenetreOuverte}
+        onFermer={() => setFenetreOuverte(false)}
+        pdf={generatedPdf}
+        nomFichier={nomFichierPdf}
+        numero={numeroProforma}
+        total={`${formatPrice(calculateTotals.total)} MGA`}
+        messageWhatsApp={generatedPdf ? messageWhatsAppDevis() : ""}
+      />
     </section>
   );
 };
