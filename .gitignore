@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Tutos vidéo : les MP4 (2 Mo pièce) sont produits par publications-30j/astuces
+# et envoyés par FTP ; seules les affiches .jpg sont suivies.
+public/videos/*.mp4

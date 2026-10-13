@@ -1,12 +1,14 @@
 import jsPDF from 'jspdf';
 import { Product } from '@/data/products';
 import { getDeliveryRate, formatPrice, DeliveryType } from './deliveryRates';
+import { LOGO_DEVIS, QR_DEVIS } from './devisImages';
 
 // Fonction pour convertir les nombres en lettres
 function numberToWords(num: number): string {
   const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
   const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
-  const tens = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingts', 'quatre-vingt-dix'];
+  // 70 et 90 sont traités à part (soixante-dix, quatre-vingt-dix) ; 80 prend son s plus bas.
+  const tens = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
   const scales = ['', 'mille', 'million', 'milliard'];
 
   if (num === 0) return 'zéro';
@@ -30,20 +32,15 @@ function numberToWords(num: number): string {
       const tensDigit = Math.floor(n / 10);
       const unitsDigit = n % 10;
 
-      if (tensDigit === 7) {
-        result += 'soixante';
-        if (unitsDigit >= 10) {
-          result += '-' + teens[unitsDigit - 10];
-        } else if (unitsDigit > 0) {
-          result += '-' + units[unitsDigit + 10];
-        }
-      } else if (tensDigit === 9) {
-        result += 'quatre-vingt';
-        if (unitsDigit >= 10) {
-          result += '-' + teens[unitsDigit - 10];
-        } else if (unitsDigit > 0) {
-          result += '-' + units[unitsDigit + 10];
-        }
+      // 70-79 et 90-99 s'écrivent « soixante-dix… » et « quatre-vingt-dix… » : l'unité se lit
+      // dans `teens`, jamais dans `units`. L'ancien code faisait units[unitsDigit + 10], hors
+      // du tableau : tout total tombant sur 71-79 ou 91-99 sortait « quatre-vingt-undefined »
+      // (mesuré le 13/10/2026 sur 3 295 000 Ar, un panier banal).
+      if (tensDigit === 7 || tensDigit === 9) {
+        result += tensDigit === 7 ? 'soixante' : 'quatre-vingt';
+        result += '-' + teens[unitsDigit];
+      } else if (tensDigit === 8 && unitsDigit === 0) {
+        result += 'quatre-vingts';   // « quatre-vingts » prend un s quand rien ne suit
       } else {
         result += tens[tensDigit];
         if (unitsDigit > 0) {
@@ -65,9 +62,11 @@ function numberToWords(num: number): string {
   while (num > 0) {
     const chunk = num % 1000;
     if (chunk !== 0) {
-      let chunkText = convertHundreds(chunk);
+      // « mille » est invariable et ne se dit pas « un mille » ; million et milliard prennent un s.
+      let chunkText = scaleIndex === 1 && chunk === 1 ? '' : convertHundreds(chunk);
       if (scaleIndex > 0) {
-        chunkText += ' ' + scales[scaleIndex];
+        const echelle = scales[scaleIndex] + (scaleIndex >= 2 && chunk > 1 ? 's' : '');
+        chunkText = (chunkText ? chunkText + ' ' : '') + echelle;
       }
       result = chunkText + (result ? ' ' + result : '');
     }
@@ -107,16 +106,18 @@ export interface InvoiceData {
 // ---------------------------------------------------------------------------
 type RGB = [number, number, number];
 
-const BRAND: RGB = [30, 107, 140];      // #1E6B8C  bleu marque principal
-const BRAND_DARK: RGB = [20, 78, 103];  // #144E67  bleu profond (pied de page)
-const ACCENT: RGB = [41, 148, 192];     // #2994C0  bleu clair d'accent
+// Charte du site (src/index.css) : le PDF portait le bleu de Fonenako jusqu'au 13/10/2026.
+const BRAND: RGB = [13, 89, 165];       // #0D59A5  bleu Tsena (primary)
+const BRAND_DARK: RGB = [10, 64, 118];  // #0A4076  bleu profond (pied de page)
+const ACCENT: RGB = [174, 75, 4];       // #AE4B04  orange Tsena (accent)
+const ACCENT_CLAIR: RGB = [255, 152, 81]; // #FF9851 orange clair
 const LIGHT: RGB = [244, 246, 248];     // #F4F6F8  fond gris très clair
 const ROW_ALT: RGB = [247, 249, 251];   // ligne alternée
 const BORDER: RGB = [222, 227, 232];    // bordures fines
 const TEXT: RGB = [33, 37, 41];         // texte principal
 const MUTED: RGB = [125, 133, 141];     // texte secondaire
 const WHITE: RGB = [255, 255, 255];
-const HEADER_SUB: RGB = [214, 233, 242]; // texte clair sur bande bleue
+const HEADER_SUB: RGB = [220, 232, 242]; // texte clair sur bande bleue
 
 // Géométrie de la page (A4 portrait, mm)
 const PAGE_W = 210;
@@ -131,6 +132,14 @@ const MAX_Y = PAGE_H - FOOTER_RESERVE;
 const COL_QTY = 122;   // centre
 const COL_PU = 160;    // bord droit (prix unitaire)
 const COL_TOTAL = RIGHT; // bord droit (total)
+
+/**
+ * Mentions légales du bas de devis. NIF, STAT et forme juridique ne sont pas connus
+ * (page /mentions-legales, « à compléter ») : tant qu'Andry ne les donne pas, on écrit
+ * ce qui est vrai, jamais un numéro inventé ni la mention « à compléter ».
+ */
+const IDENTITE_LEGALE =
+  'Tsena Imprimante — Avaradoha, Antananarivo 101, Madagascar — Tel 033 71 063 34 / 032 47 041 43 — tsenaimprimante@gmail.com';
 
 const TYPE_LABELS: Record<string, string> = {
   inkjet: "Jet d'encre",
@@ -165,28 +174,40 @@ export class PDFGenerator {
     this.fill(pdf, ACCENT);
     pdf.rect(0, bandH, PAGE_W, 2, 'F');
 
-    // Identité (gauche)
+    // Logo de la page (gouttes d'encre) sur pastille blanche : le devis n'en portait aucun
+    // jusqu'au 13/10/2026.
+    const logoD = 20, logoY = 7;
+    this.fill(pdf, WHITE);
+    pdf.roundedRect(M - 1.5, logoY - 1.5, logoD + 3, logoD + 3, 2.5, 2.5, 'F');
+    try {
+      pdf.addImage(LOGO_DEVIS, 'PNG', M, logoY, logoD, logoD);
+    } catch {
+      /* un devis sans logo reste un devis valable : jamais d'échec pour une image */
+    }
+
+    // Identité (à droite du logo)
+    const txtX = M + logoD + 6;
     this.ink(pdf, WHITE);
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(23);
-    pdf.text('TSENA IMPRIMANTE', M, 19);
+    pdf.setFontSize(20);
+    pdf.text('TSENA IMPRIMANTE', txtX, 17);
 
     this.ink(pdf, HEADER_SUB);
     pdf.setFont('helvetica', 'italic');
-    pdf.setFontSize(9.5);
-    pdf.text('Votre partenaire imprimante eto Madagasikara', M, 26.5);
+    pdf.setFontSize(9);
+    pdf.text('Votre partenaire imprimante eto Madagasikara', txtX, 24);
 
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8);
-    pdf.text('Tel 033 71 063 34   ·   Facebook TsenaImprimante', M, 33);
-    pdf.text('tsenaimprimante.fonenako.mg', M, 38);
+    pdf.text('Tel 033 71 063 34  ·  032 47 041 43  ·  Facebook TsenaImprimante', M, 33);
+    pdf.text('tsenaimprimante.fonenako.mg  ·  Avaradoha, Antananarivo 101', M, 38);
 
     // Titre document (droite, dans la bande)
     this.ink(pdf, WHITE);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(15);
     pdf.text('FACTURE PROFORMA', RIGHT, 20, { align: 'right' });
-    this.stroke(pdf, ACCENT);
+    this.stroke(pdf, ACCENT_CLAIR);
     pdf.setLineWidth(0.6);
     pdf.line(RIGHT - 46, 23.5, RIGHT, 23.5);
 
@@ -303,9 +324,11 @@ export class PDFGenerator {
       pdf.setFontSize(9);
       pdf.text(pdf.splitTextToSize(item.product.name, 92)[0], M + 4, y + 5);
 
-      // Sous-ligne descriptive (gris)
+      // Sous-ligne descriptive (gris). La RÉFÉRENCE remplace le poids depuis le 13/10/2026 :
+      // c'est elle que le client retrouve sur sa commande et sur sa facture.
       const typeLabel = TYPE_LABELS[item.product.type] || item.product.type;
-      const desc = `${item.product.brand}  ·  ${typeLabel}  ·  ${item.product.weight} kg`;
+      const reference = (item.product as { model?: string }).model || item.product.id;
+      const desc = `${item.product.brand}  ·  ${typeLabel}  ·  Réf. ${reference}`;
       this.ink(pdf, MUTED);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(7.5);
@@ -380,7 +403,6 @@ export class PDFGenerator {
       'Facture proforma valable 30 jours',
       'Installation gratuite à Antananarivo',
       'Garantie constructeur applicable',
-      'Paiement : Espèces · Mobile Money · Virement',
     ];
     this.ink(pdf, [90, 96, 102]);
     pdf.setFont('helvetica', 'normal');
@@ -457,6 +479,87 @@ export class PDFGenerator {
     return y + 5 + lines.length * 4.5 + 4;
   }
 
+  // -- Paiement · signature · QR (bas du devis) -----------------------------
+  // Ajouté le 13/10/2026 : le devis se terminait sur un tiers de page vide, sans moyen
+  // de paiement utilisable, sans endroit où signer et sans mention légale.
+  private static addPaiementEtSignature(pdf: jsPDF, y: number): number {
+    const h = 34;
+    const colW = (CONTENT_W - 6) / 2;
+
+    // --- Paiement (gauche) ---
+    this.fill(pdf, LIGHT);
+    this.stroke(pdf, BORDER);
+    pdf.setLineWidth(0.3);
+    pdf.roundedRect(M, y, colW, h, 2.5, 2.5, 'FD');
+
+    this.ink(pdf, BRAND);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('COMMENT PAYER', M + 5, y + 7);
+
+    this.ink(pdf, [80, 86, 92]);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    const moyens = [
+      'Espèces à la livraison, à Antananarivo',
+      'Mobile Money : MVola, Orange Money, Airtel Money',
+      'Virement bancaire : coordonnées sur demande',
+      'Facture définitive remise à la livraison',
+    ];
+    let py = y + 13;
+    moyens.forEach((m) => {
+      this.ink(pdf, ACCENT);
+      pdf.text('•', M + 5, py);
+      this.ink(pdf, [80, 86, 92]);
+      pdf.text(pdf.splitTextToSize(m, colW - 14)[0], M + 9, py);
+      py += 5.0;
+    });
+
+    // --- Signature (droite) + QR ---
+    const sx = M + colW + 6;
+    this.stroke(pdf, BORDER);
+    pdf.roundedRect(sx, y, colW, h, 2.5, 2.5, 'D');
+
+    this.ink(pdf, BRAND);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('BON POUR ACCORD', sx + 5, y + 7);
+
+    this.ink(pdf, MUTED);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(7.5);
+    pdf.text('Date, signature et cachet du client', sx + 5, y + 12.5);
+
+    // Lignes à remplir
+    this.stroke(pdf, BORDER);
+    pdf.setLineWidth(0.25);
+    pdf.line(sx + 5, y + 23, sx + colW - 34, y + 23);
+    pdf.line(sx + 5, y + 30, sx + colW - 34, y + 30);
+
+    // QR vers le site, à droite du cadre de signature
+    try {
+      pdf.addImage(QR_DEVIS, 'PNG', sx + colW - 27, y + 8, 21, 21);
+      this.ink(pdf, MUTED);
+      pdf.setFontSize(6);
+      pdf.text('Notre catalogue', sx + colW - 16.5, y + 32, { align: 'center' });
+    } catch {
+      /* le QR est un bonus : son absence ne casse pas le devis */
+    }
+
+    return y + h + 6;
+  }
+
+  // -- Mentions légales (pied de document) ----------------------------------
+  private static addMentions(pdf: jsPDF, y: number): number {
+    const lignes = [IDENTITE_LEGALE, 'Document non contractuel tant qu\'il n\'est pas signé. Prix en ariary (MGA).']
+      .filter(Boolean) as string[];
+    this.ink(pdf, MUTED);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(6.8);
+    lignes.forEach((l, i) => pdf.text(pdf.splitTextToSize(l, CONTENT_W)[0], M, y + i * 3.6));
+    return y + lignes.length * 3.6;
+  }
+
   // -- Remerciement + bande de pied de page sur toutes les pages ------------
   private static addThanks(pdf: jsPDF, y: number) {
     this.ink(pdf, BRAND);
@@ -490,11 +593,12 @@ export class PDFGenerator {
     this.addHeader(pdf);
     this.addMetaBlocks(pdf, invoiceData);
 
-    let y = this.addProductsTable(pdf, invoiceData.products, 105);
+    let y = this.addProductsTable(pdf, invoiceData.products, 101);
     y += 10;
 
     // Réserver la place du bas (livraison + totaux + conditions + remerciement)
-    const bottomNeeded = 88 + (invoiceData.notes ? 16 : 0);
+    // livraison + notes + totaux + remerciement + paiement/signature
+    const bottomNeeded = 116 + (invoiceData.notes ? 12 : 0);
     if (y + bottomNeeded > MAX_Y) {
       pdf.addPage();
       y = 24;
@@ -508,7 +612,20 @@ export class PDFGenerator {
 
     y = this.addTotalsAndConditions(pdf, invoiceData, y);
 
-    this.addThanks(pdf, y + 8);
+    // Le remerciement suit le montant en lettres ; posé après le bloc paiement, il
+    // chevauchait les mentions légales (vu sur le rendu du 13/10/2026).
+    this.addThanks(pdf, y + 5);
+    y += 6;
+
+    // Paiement + signature : sur la page en cours s'il reste la place, sinon la suivante.
+    if (y + 36 > MAX_Y - 6) {
+      pdf.addPage();
+      y = 24;
+    }
+    this.addPaiementEtSignature(pdf, y);
+
+    // Les mentions tiennent toujours juste au-dessus de la bande de pied de page.
+    this.addMentions(pdf, MAX_Y - 5);
     this.paintFooters(pdf);
 
     return pdf;

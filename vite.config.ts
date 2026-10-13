@@ -23,6 +23,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // jsPDF tire html2canvas pour pdf.html(), que le site n'utilise pas : 200 Ko de moins.
+      "html2canvas": path.resolve(__dirname, "./src/lib/html2canvas-vide.ts"),
     },
   },
   build: {

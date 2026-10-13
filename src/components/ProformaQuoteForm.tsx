@@ -203,7 +203,19 @@ const ProformaQuoteForm = () => {
         description: "Nous vous rappelons pour confirmer disponibilité et délai."
       });
     } else {
+      // Avant le 13/10/2026 l'échec ne produisait qu'un événement interne : le client repartait
+      // avec son PDF en croyant sa demande partie, et personne n'était prévenu.
       evenement("formulaire_erreur", { f: "devis", e: resultat.erreur });
+      toast.error("Votre devis est téléchargé, mais la demande n'a pas pu nous être envoyée.", {
+        description: "Envoyez-le-nous sur WhatsApp ou appelez-nous : on vous répond tout de suite.",
+        duration: 12000,
+        action: {
+          label: "WhatsApp",
+          onClick: () => window.open(
+            lienWhatsApp(`Bonjour, je viens de faire un devis proforma sur le site au nom de ${formData.name}. Pouvez-vous me rappeler ?`),
+            "_blank", "noopener"),
+        },
+      });
     }
   };
 

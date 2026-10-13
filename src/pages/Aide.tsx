@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
+import EnTetePage from "@/components/EnTetePage";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,14 +41,16 @@ const Aide = () => {
         <script type="application/ld+json">{JSON.stringify(jsonld)}</script>
       </Helmet>
       <Header />
+      <EnTetePage
+        titre={"Aide & dépannage"}
+        sousTitre={"Les réponses que nous donnons chaque jour sur Messenger, ici en une page."}
+        icone={<LifeBuoy className="h-12 w-12" aria-hidden="true" />}
+        fil={[{ libelle: "Aide" }]}
+      />
       <main className="container mx-auto px-4 py-10 sm:py-14">
         <div className="text-center mb-10">
-          <LifeBuoy className="h-12 w-12 text-primary mx-auto mb-4" aria-hidden="true" />
-          <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-3">Aide & dépannage</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Les réponses que nous donnons chaque jour sur Messenger, ici en une page. Fitenin'ny mpanjifa : malagasy sy frantsay.
-          </p>
-          <div className="mt-5 inline-flex rounded-lg border p-1" role="group" aria-label="Langue des réponses">
+          <p className="text-muted-foreground mb-3" lang="mg">Fitenin'ny mpanjifa : malagasy sy frantsay.</p>
+          <div className="inline-flex rounded-lg border p-1" role="group" aria-label="Langue des réponses">
             <Button size="sm" variant={langue === "fr" ? "default" : "ghost"} onClick={() => setLangue("fr")} aria-pressed={langue === "fr"}>Français</Button>
             <Button size="sm" variant={langue === "mg" ? "default" : "ghost"} onClick={() => setLangue("mg")} aria-pressed={langue === "mg"} lang="mg">Malagasy</Button>
           </div>
@@ -110,6 +113,12 @@ const Aide = () => {
                 <Wrench className="h-6 w-6 text-success" aria-hidden="true" />
                 Pannes courantes : que faire avant d'appeler
               </h2>
+              <p className="mb-4 text-muted-foreground">
+                Les mêmes gestes en vidéo, expliqués en malgache :{" "}
+                <Link to="/tutos" className="font-semibold text-primary underline-offset-2 hover:underline">
+                  voir les tutos vidéo
+                </Link>.
+              </p>
               <Accordion type="single" collapsible className="space-y-2">
                 {AIDE_PANNES.map((p, i) => (
                   <Card key={i}>

@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Phone, MessageCircle, HelpCircle, Wrench, Truck, CreditCard } from "lucide-react";
 import Header from "@/components/Header";
+import EnTetePage from "@/components/EnTetePage";
 import Footer from "@/components/Footer";
 
 // Audit 06/09/2026 : données structurées FAQPage (extraits enrichis Google, moteurs de réponse IA).
@@ -40,19 +41,17 @@ const FAQ = () => {
         <script type="application/ld+json">{JSON.stringify(FAQ_JSONLD)}</script>
       </Helmet>
       <Header />
+      <EnTetePage
+        titre={"Questions fréquentes"}
+        sousTitre={"Les réponses à vos questions sur nos imprimantes, la livraison, la garantie et le support."}
+        icone={<HelpCircle className="h-12 w-12" aria-hidden="true" />}
+        fil={[{ libelle: "Questions fréquentes" }]}
+      />
 
       <main className="py-16">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <HelpCircle className="h-16 w-16 mx-auto text-primary mb-4" />
-            <h1 className="text-4xl font-bold text-primary mb-4">
-              Questions Fréquentes
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Retrouvez toutes les réponses à vos questions sur nos imprimantes,
-              nos services et notre support technique.
-            </p>
+          <div className="mb-12">
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

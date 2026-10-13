@@ -16,6 +16,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Blog = lazy(() => import("./pages/Blog"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const Aide = lazy(() => import("./pages/Aide"));
+const Tutos = lazy(() => import("./pages/Tutos"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/conseils" element={<Conseils />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/aide" element={<Aide />} />
+          <Route path="/tutos" element={<Tutos />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<ArticleDetail />} />
             <Route path="/privacy" element={<Privacy />} />

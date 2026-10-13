@@ -44,6 +44,15 @@ if ($t === 'page') {
     $ligne['r'] = tsena_texte($d['r'] ?? '', 100);
     $ligne['l'] = tsena_texte($d['l'] ?? '', 10);
     $ligne['w'] = max(0, min(10000, (int)($d['w'] ?? 0)));
+    // Provenance marquee (utm_*). Sans elle, les 101 visites du 07/09 au 13/10 ne
+    // disaient d'ou venait aucun clic, alors que chaque publication Facebook portait
+    // un lien marque. Rien d'identifiant : seulement la campagne d'origine.
+    foreach (['us', 'um', 'uc', 'ut'] as $cle) {
+        $valeur = tsena_texte($d[$cle] ?? '', 60);
+        if ($valeur !== '') {
+            $ligne[$cle] = $valeur;
+        }
+    }
 } elseif ($t === 'evt') {
     $ligne['n'] = tsena_texte($d['n'] ?? '', 40);
     $ligne['d'] = is_array($d['d'] ?? null) ? array_slice(array_map(fn($x) => is_scalar($x) ? mb_substr((string)$x, 0, 80) : '', $d['d']), 0, 8, true) : [];

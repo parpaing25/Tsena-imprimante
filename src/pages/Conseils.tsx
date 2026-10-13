@@ -16,6 +16,8 @@ import {
   CheckCircle
 } from "lucide-react";
 import Header from "@/components/Header";
+import EnTetePage from "@/components/EnTetePage";
+import { lienWhatsApp, ouvrirMessenger } from "@/config/contact";
 import Footer from "@/components/Footer";
 
 const Conseils = () => {
@@ -24,25 +26,22 @@ const Conseils = () => {
   };
 
   const handleMessenger = () => {
-    window.open("https://m.me/TsenaImprimante", "_blank");
+    ouvrirMessenger();
   };
 
   const handleCommand = (productName: string) => {
     const message = `Bonjour ! Je souhaite commander l'imprimante ${productName}. Pouvez-vous me donner plus d'informations ?`;
-    const whatsappUrl = `https://wa.me/261327209033?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(lienWhatsApp(message), '_blank', 'noopener');
   };
 
   const handleQuote = (productName: string) => {
     const message = `Bonjour ! Je souhaite un devis pour l'imprimante ${productName}. Merci !`;
-    const whatsappUrl = `https://wa.me/261327209033?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(lienWhatsApp(message), '_blank', 'noopener');
   };
 
   const handleStock = (productName: string) => {
     const message = `Bonjour ! Est-ce que l'imprimante ${productName} est disponible en stock ?`;
-    const whatsappUrl = `https://wa.me/261327209033?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(lienWhatsApp(message), '_blank', 'noopener');
   };
 
   return (
@@ -53,19 +52,17 @@ const Conseils = () => {
         <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/conseils" />
       </Helmet>
       <Header />
+      <EnTetePage
+        titre={"Conseils d'experts"}
+        sousTitre={"Nos spécialistes vous guident pour choisir l'imprimante qui correspond à votre usage et à votre budget."}
+        icone={<Lightbulb className="h-12 w-12" aria-hidden="true" />}
+        fil={[{ libelle: "Conseils" }]}
+      />
       
       <main className="py-16">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <Lightbulb className="h-16 w-16 mx-auto text-primary mb-4" />
-            <h1 className="text-4xl font-bold text-primary mb-4">
-              Conseils d'Experts
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Nos spécialistes vous guident pour choisir l'imprimante parfaite 
-              selon vos besoins et votre budget.
-            </p>
+          <div className="mb-12">
           </div>
 
           {/* Guide par Usage */}

@@ -46,7 +46,37 @@ export function pageVue(chemin: string) {
     provenance = "";
   }
   if (provenance === window.location.hostname) provenance = "";
-  expedier({ t: "page", p: chemin, r: provenance, l: navigator.language, w: window.innerWidth });
+  expedier({ t: "page", p: chemin, r: provenance, l: navigator.language, w: window.innerWidth, ...campagne() });
+}
+
+/**
+ * Provenance marquée (utm_*), retenue pour toute la visite.
+ *
+ * Audit du 13/10/2026 : 101 visites enregistrées en cinq semaines, toutes avec un
+ * référent vide et aucun utm — impossible de savoir ce que les publications Facebook
+ * rapportaient, alors que chacune portait un lien marqué `utm_campaign`.
+ * Rien d'identifiant là-dedans : seulement d'où vient le clic.
+ */
+const CLE_CAMPAGNE = "tsena.campagne";
+
+function campagne(): Charge {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const lu = {
+      us: p.get("utm_source") || "",
+      um: p.get("utm_medium") || "",
+      uc: p.get("utm_campaign") || "",
+      ut: p.get("utm_content") || "",
+    };
+    if (lu.us || lu.um || lu.uc) {
+      sessionStorage.setItem(CLE_CAMPAGNE, JSON.stringify(lu));
+      return lu;
+    }
+    const garde = sessionStorage.getItem(CLE_CAMPAGNE);
+    return garde ? (JSON.parse(garde) as Charge) : {};
+  } catch {
+    return {};   // navigation privée, stockage refusé : la page s'affiche quand même
+  }
 }
 
 export type NomEvenement =
@@ -57,7 +87,8 @@ export type NomEvenement =
   | "devis_pdf"
   | "devis_envoye"
   | "contact_envoye"
-  | "formulaire_erreur";
+  | "formulaire_erreur"
+  | "tuto_lu";
 
 export function evenement(nom: NomEvenement, details?: Charge) {
   if (dntActif()) return;

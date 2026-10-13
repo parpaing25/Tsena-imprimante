@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import EnTetePage from "@/components/EnTetePage";
 import Footer from "@/components/Footer";
 
 const Blog = () => {
@@ -83,12 +84,17 @@ const Blog = () => {
     }
   ];
 
-  const categories = [
-    { name: "Guide d'achat", count: 8, icon: <Lightbulb className="h-4 w-4" /> },
-    { name: "Nouveautés", count: 5, icon: <TrendingUp className="h-4 w-4" /> },
-    { name: "Maintenance", count: 6, icon: <Settings className="h-4 w-4" /> },
-    { name: "Comparatif", count: 4, icon: <Award className="h-4 w-4" /> }
-  ];
+  // Les comptes se calculent sur les articles : écrits en dur, ils mentaient
+  // (8/5/6/4 annoncés pour 6 articles au total, audit du 13/10/2026).
+  const icones: Record<string, JSX.Element> = {
+    "Guide d'achat": <Lightbulb className="h-4 w-4" />,
+    "Nouveautés": <TrendingUp className="h-4 w-4" />,
+    "Maintenance": <Settings className="h-4 w-4" />,
+    "Comparatif": <Award className="h-4 w-4" />,
+  };
+  const categories = Object.entries(
+    articles.reduce<Record<string, number>>((acc, a) => ({ ...acc, [a.category]: (acc[a.category] ?? 0) + 1 }), {})
+  ).map(([name, count]) => ({ name, count, icon: icones[name] ?? <Lightbulb className="h-4 w-4" /> }));
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -110,18 +116,17 @@ const Blog = () => {
         <link rel="canonical" href="https://tsenaimprimante.fonenako.mg/blog" />
       </Helmet>
       <Header />
+      <EnTetePage
+        titre={"Blog & actualités"}
+        sousTitre={"Conseils d'achat, guides et actualités de l'impression à Madagascar."}
+        icone={<BookOpen className="h-12 w-12" aria-hidden="true" />}
+        fil={[{ libelle: "Blog" }]}
+      />
       
       <main className="py-16">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <BookOpen className="h-16 w-16 mx-auto text-primary mb-4" />
-            <h1 className="text-4xl font-bold text-primary mb-4">
-              Blog & Actualités
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-              Conseils d'experts, guides d'achat et actualités du monde de l'impression à Madagascar
-            </p>
             <Button 
               onClick={() => navigate('/aide')}
               className="btn-hero mr-4"
