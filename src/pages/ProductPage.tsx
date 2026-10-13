@@ -159,7 +159,7 @@ const ProductPage = () => {
                 ) : (
                   <p className="text-3xl font-bold text-primary">{formatPrice(product.priceMin)}{product.kitIncluded && <span className="text-base font-normal text-muted-foreground"> kit externe inclus</span>}</p>
                 )}
-                <p className="text-sm text-muted-foreground">Prix TTC en ariary. {product.inStock ? "Disponible, neuve sous carton." : "Sur commande."} Paiement à la livraison, virement ou Mobile Money.</p>
+                <p className="text-sm text-muted-foreground">Prix en ariary. {product.inStock ? "Disponible, neuve sous carton." : "Sur commande."} Paiement à la livraison, virement ou Mobile Money.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
                   <Button className="btn-call w-full" onClick={() => setCommandeOuverte(true)} disabled={!product.inStock}>
                     <ShoppingCart className="h-4 w-4 mr-2" />

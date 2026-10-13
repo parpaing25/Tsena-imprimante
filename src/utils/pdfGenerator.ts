@@ -134,9 +134,9 @@ const COL_PU = 160;    // bord droit (prix unitaire)
 const COL_TOTAL = RIGHT; // bord droit (total)
 
 /**
- * Mentions légales du bas de devis. NIF, STAT et forme juridique ne sont pas connus
- * (page /mentions-legales, « à compléter ») : tant qu'Andry ne les donne pas, on écrit
- * ce qui est vrai, jamais un numéro inventé ni la mention « à compléter ».
+ * Mentions légales du bas de devis. Andry, 13/10/2026 : pas encore de NIF ni de STAT,
+ * pas de forme juridique. On écrit ce qui est vrai, jamais un numéro inventé ; les
+ * identifiants s'ajoutent ici et sur /mentions-legales le jour où ils existent.
  */
 const IDENTITE_LEGALE =
   'Tsena Imprimante — Avaradoha, Antananarivo 101, Madagascar — Tel 033 71 063 34 / 032 47 041 43 — tsenaimprimante@gmail.com';
@@ -294,8 +294,8 @@ export class PDFGenerator {
     pdf.setFontSize(8.5);
     pdf.text('DESCRIPTION', M + 4, y + 6);
     pdf.text('QTÉ', COL_QTY, y + 6, { align: 'center' });
-    pdf.text('PRIX UNIT. TTC', COL_PU, y + 6, { align: 'right' });
-    pdf.text('TOTAL TTC', COL_TOTAL - 3, y + 6, { align: 'right' });
+    pdf.text('PRIX UNIT. (MGA)', COL_PU, y + 6, { align: 'right' });
+    pdf.text('TOTAL (MGA)', COL_TOTAL - 3, y + 6, { align: 'right' });
 
     return y + h;
   }
@@ -425,7 +425,7 @@ export class PDFGenerator {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9.5);
     this.ink(pdf, TEXT);
-    pdf.text('Sous-total TTC', labelX, y + 4);
+    pdf.text('Sous-total', labelX, y + 4);
     pdf.text(`${formatPrice(invoiceData.subtotal)} MGA`, valX, y + 4, { align: 'right' });
 
     pdf.text('Livraison', labelX, y + 11);
@@ -436,7 +436,7 @@ export class PDFGenerator {
     pdf.setLineWidth(0.3);
     pdf.line(boxX, y + 15, RIGHT, y + 15);
 
-    // Bandeau TOTAL TTC
+    // Bandeau TOTAL (sans « TTC » : pas de NIF, donc pas d'assujettissement à la TVA — 13/10/2026)
     const totalY = y + 17;
     const totalH = 13;
     this.fill(pdf, BRAND);
@@ -444,7 +444,7 @@ export class PDFGenerator {
     this.ink(pdf, WHITE);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(10);
-    pdf.text('TOTAL TTC', labelX, totalY + 8.5);
+    pdf.text('TOTAL', labelX, totalY + 8.5);
     pdf.setFontSize(12);
     pdf.text(`${formatPrice(invoiceData.total)} MGA`, valX, totalY + 8.5, { align: 'right' });
 

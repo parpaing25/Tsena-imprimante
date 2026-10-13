@@ -1,4 +1,4 @@
-// Tarifs de livraison par région à Madagascar (en MGA TTC)
+// Tarifs de livraison par région à Madagascar (en MGA)
 export interface DeliveryRate {
   region: string;
   distance: number; // Distance depuis Tana en km

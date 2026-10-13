@@ -112,7 +112,7 @@ const ProductCatalog = () => {
           </span>
         </div>
         <p className="mt-1 text-[12.5px] text-muted-foreground sm:mt-3 sm:text-lg">
-          Canon, HP et Epson, neuves sous carton. Prix TTC en ariary, livraison province,
+          Canon, HP et Epson, neuves sous carton. Prix en ariary, livraison province,
           installation gratuite à Tana.
         </p>
 

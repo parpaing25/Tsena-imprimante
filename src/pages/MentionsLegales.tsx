@@ -11,10 +11,10 @@ import { CONTACT } from "@/config/contact";
  * d'afficher son identité, son adresse, ses coordonnées et ses identifiants
  * fiscaux ; la loi n° 2014-038 encadre les données personnelles.
  *
- * Les champs marqués « à compléter » attendent les identifiants officiels
- * d'Andry (NIF, STAT, forme juridique, nom du responsable).
+ * 13/10/2026, réponse d'Andry : pas encore de NIF ni de STAT, pas de forme juridique.
+ * La page dit donc ce qui est vrai aujourd'hui, au lieu d'afficher « à compléter » ;
+ * les lignes se complètent le jour où les identifiants existent.
  */
-const A_COMPLETER = "à compléter";
 
 const MentionsLegales = () => (
   <div className="min-h-screen bg-background">
@@ -28,7 +28,7 @@ const MentionsLegales = () => (
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-3">Mentions légales</h1>
-          <p className="text-muted-foreground">Informations sur l'éditeur du site et vos droits. Dernière mise à jour : 6 septembre 2026.</p>
+          <p className="text-muted-foreground">Informations sur l'éditeur du site et vos droits. Dernière mise à jour : 13 octobre 2026.</p>
         </div>
 
         <Card>
@@ -36,10 +36,9 @@ const MentionsLegales = () => (
           <CardContent>
             <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
               <dt className="font-medium">Enseigne</dt><dd className="sm:col-span-2">{CONTACT.nom}</dd>
-              <dt className="font-medium">Forme juridique</dt><dd className="sm:col-span-2">Entreprise individuelle — <em>{A_COMPLETER}</em></dd>
-              <dt className="font-medium">Responsable de publication</dt><dd className="sm:col-span-2"><em>{A_COMPLETER} (nom du gérant)</em></dd>
-              <dt className="font-medium">NIF</dt><dd className="sm:col-span-2"><em>{A_COMPLETER}</em></dd>
-              <dt className="font-medium">STAT</dt><dd className="sm:col-span-2"><em>{A_COMPLETER}</em></dd>
+              <dt className="font-medium">Statut</dt><dd className="sm:col-span-2">Activité commerciale non constituée en société</dd>
+              <dt className="font-medium">NIF et STAT</dt><dd className="sm:col-span-2">Pas encore attribués</dd>
+              <dt className="font-medium">Responsable de publication</dt><dd className="sm:col-span-2">L'équipe Tsena Imprimante, joignable aux coordonnées ci-dessous</dd>
               <dt className="font-medium">Adresse</dt><dd className="sm:col-span-2">{CONTACT.adresse}</dd>
               <dt className="font-medium">Téléphone</dt><dd className="sm:col-span-2">{CONTACT.telephonePrincipal.affichage} · {CONTACT.telephoneSecondaire.affichage}</dd>
               <dt className="font-medium">E-mail</dt><dd className="sm:col-span-2"><a href={`mailto:${CONTACT.email}`} className="inline-block py-1 underline">{CONTACT.email}</a></dd>

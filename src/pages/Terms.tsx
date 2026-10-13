@@ -73,7 +73,7 @@ const Terms = () => {
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Les commandes peuvent être passées par téléphone, email ou via notre site</li>
                   <li>• Chaque commande fait l'objet d'une confirmation écrite</li>
-                  <li>• Les prix sont indiqués en Ariary Malagasy (MGA) TTC</li>
+                  <li>• Les prix sont indiqués en Ariary Malagasy (MGA)</li>
                   <li>• Les prix peuvent varier selon la disponibilité et les fluctuations de change</li>
                 </ul>
                 
