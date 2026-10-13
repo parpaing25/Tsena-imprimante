@@ -80,7 +80,7 @@ const ProductCard = ({ product, onRequestQuote }: ProductCardProps) => {
         </div>
 
         {/* Téléphone : une seule action, la fiche porte le reste */}
-        <Button asChild size="sm" className="h-10 w-full text-[13px] font-bold sm:hidden">
+        <Button asChild size="sm" className="h-11 w-full text-[13px] font-bold sm:hidden">
           <Link to={lien}>Voir la fiche</Link>
         </Button>
 

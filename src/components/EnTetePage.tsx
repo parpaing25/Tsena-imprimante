@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
@@ -24,8 +25,12 @@ export interface EnTetePageProps {
   children?: React.ReactNode;
 }
 
-const EnTetePage = ({ titre, sousTitre, icone, fil = [], children }: EnTetePageProps) => (
-  <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent">
+const EnTetePage = ({ titre, sousTitre, icone, fil = [], children }: EnTetePageProps) => {
+  const idTitre = useId();
+  // Section nommée par son titre = une zone repère : axe signalait le titre hors de toute zone
+  // (règle « region », /aide et /tutos, audit en ligne du 13/10/2026).
+  return (
+  <section aria-labelledby={idTitre} className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent">
     <div
       aria-hidden="true"
       className="entete-halo pointer-events-none absolute -top-24 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
@@ -52,7 +57,7 @@ const EnTetePage = ({ titre, sousTitre, icone, fil = [], children }: EnTetePageP
 
       <div className="text-center">
         {icone && <div className="entete-titre mb-4 flex justify-center text-primary">{icone}</div>}
-        <h1 className="entete-titre text-3xl font-bold text-primary sm:text-4xl">{titre}</h1>
+        <h1 id={idTitre} className="entete-titre text-3xl font-bold text-primary sm:text-4xl">{titre}</h1>
         {sousTitre && (
           <p className="entete-sous mx-auto mt-3 max-w-2xl text-lg text-muted-foreground">{sousTitre}</p>
         )}
@@ -60,6 +65,7 @@ const EnTetePage = ({ titre, sousTitre, icone, fil = [], children }: EnTetePageP
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default EnTetePage;

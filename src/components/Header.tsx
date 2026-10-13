@@ -13,7 +13,7 @@ const Header = () => {
     { name: "Blog", href: "/blog" },
     { name: "FAQ", href: "/faq" },
     { name: "Aide", href: "/aide" },
-    { name: "Tutos vidéo", href: "/tutos" },
+    { name: "Tutos", href: "/tutos" },
     { name: "Contact", href: "/#contact" },
   ];
 
@@ -52,12 +52,15 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6 flex-1 justify-center">
+          {/* Menu complet à partir de 1280 px : à 1024-1279 px il poussait le bouton d'appel
+              hors de l'écran (85 px de débordement mesuré à 1280 le 13/10/2026). En dessous,
+              le menu à tiroir prend le relais. */}
+          <nav className="hidden xl:flex items-center gap-1 flex-1 justify-center">
             {navigation.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                className="text-base font-semibold transition-all duration-300 hover:text-primary whitespace-nowrap px-4 py-2 rounded-lg border border-border hover:border-primary hover:bg-accent/10 hover:shadow-lg hover-scale animate-fade-in relative overflow-hidden group"
+                className="text-base font-semibold transition-all duration-300 hover:text-primary whitespace-nowrap px-3 py-2 rounded-lg border border-border hover:border-primary hover:bg-accent/10 hover:shadow-lg hover-scale animate-fade-in relative overflow-hidden group"
               >
                 <span className="relative z-10">{item.name}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -69,7 +72,7 @@ const Header = () => {
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             <Button
               onClick={handleProforma}
-              className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-accent-foreground text-xs px-2 py-1 h-8 shadow-medium"
+              className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-accent-foreground text-xs px-3 py-1 h-11 shadow-medium"
               size="sm"
             >
               <FileText className="h-3 w-3 mr-1" />
@@ -79,7 +82,7 @@ const Header = () => {
 
             <Button
               onClick={handleCall}
-              className="btn-call text-xs px-2 py-1 h-8"
+              className="btn-call text-xs px-3 py-1 h-11"
               size="sm"
             >
               <Phone className="h-3 w-3 mr-1" />
@@ -90,7 +93,7 @@ const Header = () => {
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="lg:hidden h-8 w-8 p-0" aria-label="Ouvrir le menu de navigation">
+                <Button variant="outline" size="sm" className="xl:hidden h-11 w-11 p-0" aria-label="Ouvrir le menu de navigation">
                   <Menu className="h-4 w-4" />
                   <span className="sr-only">Ouvrir le menu</span>
                 </Button>

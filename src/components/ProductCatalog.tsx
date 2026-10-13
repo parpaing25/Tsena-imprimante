@@ -153,7 +153,7 @@ const ProductCatalog = () => {
               type="button"
               onClick={() => setSelectedType(t.valeur)}
               aria-pressed={selectedType === t.valeur}
-              className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+              className={`shrink-0 min-h-[44px] rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
                 selectedType === t.valeur
                   ? "bg-primary text-primary-foreground"
                   : "border border-border bg-card text-foreground hover:border-primary"
@@ -166,7 +166,7 @@ const ProductCatalog = () => {
             type="button"
             onClick={() => setHasWifi(hasWifi === true ? null : true)}
             aria-pressed={hasWifi === true}
-            className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+            className={`shrink-0 min-h-[44px] rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
               hasWifi === true
                 ? "bg-primary text-primary-foreground"
                 : "border border-border bg-card text-foreground hover:border-primary"
