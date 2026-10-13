@@ -330,7 +330,14 @@ const ProformaQuoteForm = () => {
                   <div className="space-y-2">
                     <Label htmlFor="region">Région/Ville *</Label>
                     <Select value={formData.region} onValueChange={(value) =>
-                      setFormData(prev => ({ ...prev, region: value }))
+                      // Le mode de livraison suit la ville choisie : il restait « taxi-brousse »
+                      // pour Antananarivo, et le devis imprimait « Antananarivo · Taxi-brousse ·
+                      // Installation gratuite le jour même » (vu sur un devis réel le 13/10/2026).
+                      setFormData(prev => ({
+                        ...prev,
+                        region: value,
+                        deliveryType: value === 'Antananarivo' ? 'local-tana' : 'taxi-brousse',
+                      }))
                     }>
                       <SelectTrigger id="region" aria-label="Sélectionner votre région ou ville de livraison">
                         <SelectValue placeholder="Sélectionnez" />
