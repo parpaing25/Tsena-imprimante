@@ -3,6 +3,7 @@
 Aucun test n'écrit chez Andry : ils lisent des pages et ouvrent la fenêtre de commande sans
 l'envoyer. Les valeurs attendues viennent de /products.json, généré depuis src/data/products.ts.
 """
+import base64
 import json
 import re
 import urllib.request
@@ -93,6 +94,54 @@ def test_comparateur_ligne_vide_pour_tous_disparait(page_mobile, base_url):
     assert set(t2) == set(t) - set(identiques)
     page_mobile.get_by_role("button", name=re.compile("Afficher aussi")).click()
     assert set(_tableau(page_mobile)) == set(t)
+
+
+def _part_du_trait(page, png: bytes, x: int, couleur: list) -> float:
+    """Part des lignes de la capture où un pixel de x-4 à x+2 a la couleur du trait (± 12 par canal).
+    Décodée par le navigateur dans une page vierge : la CI n'installe pas Pillow."""
+    vierge = page.context.new_page()
+    try:
+        return vierge.evaluate(
+            """async ([b64, x, c]) => {
+                 const octets = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+                 const img = await createImageBitmap(new Blob([octets], { type: 'image/png' }));
+                 const ctx = new OffscreenCanvas(img.width, img.height).getContext('2d');
+                 ctx.drawImage(img, 0, 0);
+                 const x0 = Math.max(0, x - 4), l = 7, d = ctx.getImageData(x0, 0, l, img.height).data;
+                 let n = 0;
+                 for (let y = 0; y < img.height; y++)
+                   for (let i = 0; i < l; i++) {
+                     const k = (y * l + i) * 4;
+                     if (Math.abs(d[k] - c[0]) <= 12 && Math.abs(d[k + 1] - c[1]) <= 12 && Math.abs(d[k + 2] - c[2]) <= 12) { n++; break; }
+                   }
+                 return n / img.height;
+               }""",
+            [base64.b64encode(png).decode(), x, couleur],
+        )
+    finally:
+        vierge.close()
+
+
+def test_comparateur_trait_de_la_colonne_collee_reste_au_glisse(page_mobile, base_url):
+    # 25/10/2026 : dans un tableau border-collapse, la bordure d'une cellule sticky est peinte par le
+    # tableau et part avec lui au défilement. Mesuré en ligne à df1e8dd, 4 modèles à 390 px : trait sur
+    # 100 % des lignes avant un glissé de 150 px, 1 % après. Le trait est une ombre intérieure.
+    quatre = f"{TANK_SANS_KIT},{TANK_WIFI},{JET_AVEC_KIT},canon-ts3440"
+    page_mobile.goto(f"{base_url}/comparer?comparer={quatre}", wait_until="networkidle")
+    region = page_mobile.get_by_role("region", name=re.compile("^Comparaison de"))
+    region.scroll_into_view_if_needed()
+    assert region.evaluate("e => e.scrollWidth - e.clientWidth") > 150, "quatre modèles doivent faire glisser le tableau"
+    x, couleur = region.evaluate(
+        """z => { const c = z.querySelector('tbody th[scope=row]');
+                  const rgb = getComputedStyle(c).borderRightColor.match(/\\d+/g).slice(0, 3).map(Number);
+                  return [Math.round((c.getBoundingClientRect().right - z.getBoundingClientRect().left) * devicePixelRatio), rgb]; }"""
+    )
+    avant = _part_du_trait(page_mobile, region.screenshot(), x, couleur)
+    region.evaluate("e => { e.scrollLeft = 150; }")
+    page_mobile.wait_for_timeout(300)
+    apres = _part_du_trait(page_mobile, region.screenshot(), x, couleur)
+    assert avant >= 0.8, f"trait introuvable avant le glissé ({avant:.0%}) : la mesure ne voit pas le bord"
+    assert apres >= 0.8 * avant, f"le trait de la colonne collée disparaît au glissé : {avant:.0%} → {apres:.0%}"
 
 
 def test_comparateur_selection_dans_l_adresse(page_mobile, base_url):

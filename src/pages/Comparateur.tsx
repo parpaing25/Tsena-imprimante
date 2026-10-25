@@ -131,13 +131,15 @@ const Comparateur = () => {
                 aria-labelledby={`${idTableau}-legende`}
                 tabIndex={0}
               >
+                {/* Trait de la colonne collée en ombre intérieure, pas en border-r : dans un tableau
+                    border-collapse, la bordure d'une cellule sticky part avec le tableau au glissé (25/10/2026). */}
                 <table className="w-full border-collapse text-left text-[13px] sm:text-sm">
                   <caption id={`${idTableau}-legende`} className="sr-only">
                     Comparaison de {noms.join(", ")}
                   </caption>
                   <thead>
                     <tr className="align-top">
-                      <td className="sticky left-0 z-10 w-24 min-w-[6rem] border-r border-border bg-card p-2 sm:w-44 sm:p-4" />
+                      <td className="sticky left-0 z-10 w-24 min-w-[6rem] bg-card p-2 shadow-[inset_-1px_0_0_hsl(var(--border))] sm:w-44 sm:p-4" />
                       {modeles.map((p) => (
                         <th key={p.id} scope="col" className="min-w-[7.5rem] p-2 font-normal sm:min-w-[11rem] sm:p-4">
                           <img
@@ -175,7 +177,7 @@ const Comparateur = () => {
                         <tr key={l.titre} className="border-t border-border align-top">
                           <th
                             scope="row"
-                            className="sticky left-0 z-10 border-r border-border bg-card p-2 text-[12.5px] font-semibold text-foreground sm:p-4 sm:text-sm"
+                            className="sticky left-0 z-10 bg-card p-2 text-[12.5px] font-semibold text-foreground shadow-[inset_-1px_0_0_hsl(var(--border))] sm:p-4 sm:text-sm"
                           >
                             {l.titre}
                           </th>
