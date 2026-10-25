@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
@@ -6,11 +6,12 @@ import Footer from "@/components/Footer";
 import NotFound from "./NotFound";
 import PurchaseForm from "@/components/PurchaseForm";
 import ImageLightbox from "@/components/ImageLightbox";
+import BarreAchat from "@/components/BarreAchat";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, FileText, Phone, MessageCircle, Wifi, Printer, Zap, Truck, ShieldCheck, ChevronRight, CheckCircle } from "lucide-react";
-import { products, formatPrice, Product } from "@/data/products";
+import { products, formatPrice, formatPriceCourt, Product } from "@/data/products";
 import { CONTACT, appeler, lienWhatsApp } from "@/config/contact";
 import { evenement } from "@/lib/mesure";
 
@@ -41,6 +42,8 @@ const ProductPage = () => {
   const product = products.find((p) => p.id === id);
   const [commandeOuverte, setCommandeOuverte] = useState(false);
   const [lightbox, setLightbox] = useState(false);
+  // Bloc d'achat observé par la barre collante du téléphone (BarreAchat).
+  const blocAchat = useRef<HTMLDivElement>(null);
 
   if (!product) return <NotFound />;
 
@@ -143,7 +146,7 @@ const ProductPage = () => {
               <p className="text-muted-foreground mt-2">{TYPE_EXPLICATION[product.type]}</p>
             </div>
 
-            <Card className="border-primary/20">
+            <Card ref={blocAchat} className="border-primary/20">
               <CardContent className="pt-6 space-y-3">
                 {aDeuxPrix ? (
                   <dl className="grid grid-cols-2 gap-3">
@@ -244,6 +247,15 @@ const ProductPage = () => {
                 </CardContent>
               </Card>
             ))}
+            {similaires.length > 0 && (
+              <Button asChild className="w-full">
+                {/* Même forme que lienComparaison (src/lib/comparateur.ts), écrite ici pour ne pas
+                    tirer ce module dans un morceau partagé de plus à charger sur chaque fiche. */}
+                <Link to={`/comparer?comparer=${[product.id, ...similaires.map((p) => p.id)].join(",")}`}>
+                  Comparer ces {similaires.length + 1} modèles côte à côte
+                </Link>
+              </Button>
+            )}
             <Button asChild variant="outline" className="w-full">
               <Link to="/conseils">Guide : bien choisir son imprimante</Link>
             </Button>
@@ -254,6 +266,18 @@ const ProductPage = () => {
 
       <PurchaseForm product={product} isOpen={commandeOuverte} onClose={() => setCommandeOuverte(false)} />
       <ImageLightbox imageUrl={product.imageUrl} alt={product.name} isOpen={lightbox} onClose={() => setLightbox(false)} />
+      <BarreAchat
+        cible={blocAchat}
+        nom={product.name}
+        prix={aDeuxPrix ? `dès ${formatPriceCourt(product.priceMin)}` : formatPriceCourt(product.priceMin)}
+        lienWhatsApp={lienWhatsApp(messageWhatsApp)}
+        telephone={CONTACT.telephonePrincipal.affichage}
+        commandeDisponible={product.inStock}
+        masquee={commandeOuverte || lightbox}
+        onCommander={() => setCommandeOuverte(true)}
+        onAppeler={() => { evenement("clic_appel", { ou: "barre-fiche", produit: product.id }); appeler(); }}
+        onWhatsApp={() => evenement("clic_whatsapp", { ou: "barre-fiche", produit: product.id })}
+      />
     </div>
   );
 };

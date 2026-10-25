@@ -381,3 +381,19 @@ All colors MUST be HSL for perfect theming.
   transform: scale(0.97);
   transition-duration: 0.12s;
 }
+
+/* Barre d'achat collante de la fiche (src/components/BarreAchat.tsx). Cachée : sous l'écran ET
+   `visibility: hidden` (hors du clavier et des lecteurs d'écran), après la glissade de sortie.
+   Sortie plus courte que l'entrée (R9). Sous « réduire les animations », la règle globale ramène
+   les durées à zéro : elle paraît et disparaît sur place. */
+.barre-achat {
+  transform: translateY(110%);
+  visibility: hidden;
+  transition: transform 0.2s var(--sortie), visibility 0s linear 0.2s;
+}
+
+.barre-achat[data-visible="oui"] {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.3s var(--sortie), visibility 0s;
+}

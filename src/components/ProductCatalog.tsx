@@ -3,7 +3,8 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Scale, Search, SlidersHorizontal, X } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { products } from "@/data/products";
 import { toast } from "sonner";
@@ -234,6 +235,17 @@ const ProductCatalog = () => {
                 Voir les {reste} autres modèles
               </Button>
             )}
+
+            {/* 25/10/2026 : entrée du comparateur (/comparer, composant C n°1). */}
+            <div className="mt-2 text-center sm:mt-4">
+              <Link
+                to="/comparer"
+                className="inline-flex min-h-[44px] items-center gap-1.5 text-[13.5px] font-semibold text-primary hover:underline sm:text-base"
+              >
+                <Scale className="h-4 w-4" aria-hidden="true" />
+                Comparer des modèles côte à côte
+              </Link>
+            </div>
           </>
         ) : (
           <div className="py-10 text-center">

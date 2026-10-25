@@ -12,7 +12,7 @@ export const SITE = 'https://tsenaimprimante.fonenako.mg';
 export const SOURCE_PRODUITS = join(ROOT, 'src', 'data', 'products.ts');
 
 /** Routes sans paramètre, dans l'ordre du plan du site. */
-export const ROUTES_STATIQUES = ['/tutos', '/', '/conseils', '/faq', '/aide', '/blog', '/privacy', '/terms', '/mentions-legales'];
+export const ROUTES_STATIQUES = ['/tutos', '/', '/conseils', '/faq', '/aide', '/blog', '/comparer', '/privacy', '/terms', '/mentions-legales'];
 
 /** Identifiants des articles du blog (src/pages/ArticleDetail.tsx, clés "1"…"6"). */
 export const ARTICLES_BLOG = ['1', '2', '3', '4', '5', '6'];

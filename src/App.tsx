@@ -19,6 +19,7 @@ const Aide = lazy(() => import("./pages/Aide"));
 const Tutos = lazy(() => import("./pages/Tutos"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
+const Comparateur = lazy(() => import("./pages/Comparateur"));
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/imprimantes/:id" element={<ProductPage />} />
+            <Route path="/comparer" element={<Comparateur />} />
             <Route path="/conseils" element={<Conseils />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/aide" element={<Aide />} />
