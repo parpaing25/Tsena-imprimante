@@ -78,6 +78,23 @@ def test_mouvement_normal_rien_ne_reste_cache_apres_defilement(page_mobile, base
     ) == 0
 
 
+@pytest.mark.parametrize("chemin", ["/faq", "/comparer"])
+def test_entete_rien_d_anime_sur_le_titre_ni_le_sous_titre(page_mobile, base_url, chemin):
+    """MOUVEMENT.md R3 : rien d'animé sur l'élément LCP. Le sous-titre de l'en-tête est l'élément
+    LCP de /faq et /comparer ; animé (opacité 0, 0,6 s), il portait le LCP de /faq de 1 786 à
+    4 525 ms en limitation réelle (Lighthouse devtools, médiane de 3, 25/10/2026)."""
+    page_mobile.goto(base_url + chemin, wait_until="load")
+    # Page chargée à la demande : à « load », React peut montrer l'attente (aucun en-tête).
+    # Attendre le titre AVANT de lire les styles, sinon la liste est vide et l'essai passe à tort.
+    page_mobile.locator("h1.entete-titre").wait_for()
+    animes = page_mobile.evaluate(
+        "() => [...document.querySelectorAll('.entete-titre, .entete-sous')]"
+        ".map(e => e.tagName + ':' + getComputedStyle(e).animationName)"
+    )
+    assert any(a.startswith("H1:") for a in animes), f"en-tête introuvable : {animes}"
+    assert [a for a in animes if not a.endswith(":none")] == [], f"titre ou sous-titre de l'en-tête animé : {animes}"
+
+
 def test_sans_javascript_la_section_contact_est_lisible(page_sans_js, base_url):
     page_sans_js.goto(base_url + "/", wait_until="load")
     contact = page_sans_js.locator("#contact")

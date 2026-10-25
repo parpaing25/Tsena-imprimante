@@ -243,9 +243,12 @@ All colors MUST be HSL for perfect theming.
      de ses descendants `position: fixed`. Rendu identique pendant et après l'animation. */
   .animate-fade-in { animation: fadeIn 0.6s ease-out backwards; }
 
-  /* En-tête de page : le titre monte, le sous-titre suit, le fond glisse doucement. */
-  .entete-titre { animation: slideInUp 0.6s ease-out backwards; }
-  .entete-sous { animation: slideInUp 0.6s ease-out 0.12s backwards; }
+  /* En-tête de page : le fil d'Ariane apparaît, le fond glisse doucement.
+     25/10/2026 (MOUVEMENT.md R3 : rien d'animé sur l'élément LCP) : le titre et le sous-titre ne
+     s'animent plus. Le sous-titre est l'élément LCP de /faq et /comparer ; avec son entrée
+     (opacité 0, 0,6 s + 0,12 s), Lighthouse en limitation réelle (devtools, médiane de 3, local)
+     mesurait le LCP de /faq à 4 525 ms contre 1 786 au départ, et 1 838 sans l'entrée.
+     Les classes restent comme repères. */
   .entete-fil { animation: fadeIn 0.6s ease-out 0.24s backwards; }
   .entete-halo { animation: haloDerive 18s ease-in-out infinite alternate; }
 }
@@ -278,8 +281,6 @@ All colors MUST be HSL for perfect theming.
   .animate-slide-in-up,
   .animate-fade-in-scale,
   .animate-bounce-in,
-  .entete-titre,
-  .entete-sous,
   .entete-fil {
     opacity: 1 !important;
     transform: none !important;
