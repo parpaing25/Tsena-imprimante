@@ -1,0 +1,60 @@
+name: Nuit — production
+
+# Chaque nuit a 01:30 UTC (04:30 a Antananarivo) : le site en ligne est-il
+# entier ? Statuts, 404 reel, en-tetes, hash du bundle, parcours de commande
+# (piege a robots rempli : aucune demande n'atteint Andry), dependances.
+# En echec : message Telegram (secrets TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID).
+# ⚠ GitHub ne lance un `schedule` que depuis la branche PAR DEFAUT du depot (aujourd'hui `main`,
+# qui n'a pas ce fichier) : tant qu'elle n'est pas la branche de production, cette veille ne part pas.
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  surveiller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependances Python
+        run: |
+          pip install -r tests/requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Verification du site en ligne (statuts, 404, en-tetes, hash, liens)
+        id: verif
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python outils/verifier_site.py --alerte
+
+      - name: Parcours critiques en production
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set +e
+          python -m pytest tests/e2e -q --tb=line --base-url https://tsenaimprimante.fonenako.mg > pytest.log 2>&1
+          code=$?
+          tail -30 pytest.log
+          if [ $code -ne 0 ] && [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+            msg="⚠️ Tsena Imprimante — banc nocturne en ECHEC%0A$(tail -8 pytest.log | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')"
+            curl -s -o /dev/null "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d chat_id="$TELEGRAM_CHAT_ID" --data-urlencode "text=$msg"
+          fi
+          exit $code
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Dependances vulnerables (information)
+        run: npm audit --audit-level=high || echo "::warning::vulnerabilites hautes/critiques — voir npm audit"

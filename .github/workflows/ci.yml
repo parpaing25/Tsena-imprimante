@@ -1,0 +1,83 @@
+name: CI
+
+# Garde-fou de la branche de production (audit/prelancement-2026-09) et des branches de travail.
+# Ecrit le 06/09/2026 mais jamais suivi par git avant le 25/10/2026 : aucune CI n'avait tourne.
+
+on:
+  pull_request:
+  push:
+    branches: [main, "audit/**", "feat/**", "fix/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier-construire-tester:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependances
+        run: npm ci --no-audit --no-fund
+
+      # La bible du bot (../bot-imprimante) n'est pas dans ce depot : ici la concordance des prix
+      # est sautee (avertissement du script). Elle reste verifiee par le build local avant tout envoi.
+      - name: Typecheck + lint + coherence catalogue
+        run: npm run verify
+
+      # 25/10/2026 : 11 vulnerabilites connues (2 critiques jspdf/dompurify, 3 hautes), que seules des
+      # versions MAJEURES corrigent (jspdf 4, zod 4, react-router 7) : chantier a part, decision d'Andry.
+      # Bloquant, ce pas arretait tout le reste (build, parcours, Lighthouse) : il avertit, il n'arrete pas.
+      - name: Audit des dependances de production (avertissement)
+        run: npm audit --omit=dev --audit-level=high || echo "::warning title=npm audit::vulnerabilites hautes ou critiques (voir le journal de ce pas)"
+
+      - name: Build + pre-rendu + SEO
+        run: npm run build
+
+      - name: Controle du build (404.html, sitemap, products.json, fiches produit)
+        run: |
+          test -f dist/404.html
+          test -f dist/sitemap.xml
+          test -f dist/llms.txt
+          test -f dist/.htaccess
+          test -f dist/imprimantes/canon-g2470/index.html
+          node -e "const d=require('./dist/products.json'); if(d.nombre_produits<12) process.exit(1)"
+          grep -q 'src="/assets/' dist/index.html || { echo 'chemins relatifs detectes'; exit 1; }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Playwright (Python)
+        run: |
+          pip install -r tests/requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Parcours critiques sur dist/
+        run: python -m pytest tests/e2e -q --tb=short
+
+      - name: Lighthouse CI (budgets mobiles)
+        run: |
+          npm install -g @lhci/cli@0.14.x
+          lhci autorun --config=lighthouserc.json
+
+      - name: Conserver dist/
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
+          if-no-files-found: ignore

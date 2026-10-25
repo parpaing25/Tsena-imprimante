@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Indian/Antananarivo
+    open-pull-requests-limit: 5
+    groups:
+      radix:
+        patterns: ["@radix-ui/*"]
+      outils-build:
+        patterns: ["vite", "@vitejs/*", "typescript", "eslint*", "typescript-eslint", "tailwindcss", "postcss", "autoprefixer"]
+    ignore:
+      # Majeures a passer a la main (API) : jspdf 4, vite 6/7, react-router 7
+      - dependency-name: "jspdf"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly

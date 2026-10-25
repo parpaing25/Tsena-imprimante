@@ -195,9 +195,13 @@ def test_devis_pdf_genere(page_mobile, base_url):
     page_mobile.get_by_role("option").first.click()
     remplir_piege(page_mobile)
     dv.get_by_role("button", name="Générer la Facture Proforma").click()
-    dv.get_by_role("button", name="Télécharger PDF").wait_for(timeout=20000)
+    # Depuis le 13/10/2026 (ccbd3a2), le PDF se telecharge depuis une FENETRE qui s'ouvre a la
+    # generation (FenetreProforma, rendue hors de #devis) : le bouton n'est plus dans la section.
+    fenetre = page_mobile.get_by_role("dialog", name="Votre facture proforma est prête")
+    telecharger = fenetre.get_by_role("button", name="Télécharger le PDF")
+    telecharger.wait_for(timeout=20000)
     with page_mobile.expect_download(timeout=20000) as dl:
-        dv.get_by_role("button", name="Télécharger PDF").click()
+        telecharger.click()
     assert dl.value.suggested_filename.endswith(".pdf")
     assert "MGA MGA" not in dv.inner_text(), "double devise corrigee"
 
