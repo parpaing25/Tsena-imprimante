@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "url": ["/", "/faq", "/imprimantes/canon-g2470"],
+      "url": ["/", "/faq", "/imprimantes/canon-g2470", "/comparer?comparer=canon-g2470,canon-mg2545s"],
       "numberOfRuns": 2,
       "settings": {
         "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 13; SM-A135F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
@@ -25,7 +25,7 @@
         "button-name": "error",
         "link-name": "error",
         "image-alt": "error",
-        "tap-targets": "warn"
+        "target-size": "warn"
       }
     },
     "upload": { "target": "temporary-public-storage" }
