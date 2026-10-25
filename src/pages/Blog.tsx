@@ -152,7 +152,7 @@ const Blog = () => {
               {articles
                 .filter(article => article.featured)
                 .map(article => (
-                  <Card key={article.id} className="mb-8 hover:shadow-medium transition-all duration-300 border-2 border-primary/20">
+                  <Card key={article.id} className="mb-8 hover:shadow-medium transition-shadow duration-200 border-2 border-primary/20">
                     <CardHeader>
                       <div className="flex items-center gap-2 mb-2">
                         <Badge className="bg-primary text-primary-foreground">Article Vedette</Badge>
@@ -197,7 +197,7 @@ const Blog = () => {
                 {articles
                   .filter(article => !article.featured)
                   .map(article => (
-                    <Card key={article.id} className="hover:shadow-medium transition-all duration-300 hover:-translate-y-1">
+                    <Card key={article.id} className="ressort-carte hover:shadow-medium">
                       <CardHeader>
                         <div className="mb-2">
                           <Badge variant="outline" className={getCategoryColor(article.category)}>

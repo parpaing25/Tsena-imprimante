@@ -109,7 +109,7 @@ const Index = () => {
               </div>
               <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
                 {AVANTAGES.map((a) => (
-                  <Card key={a.titre} className="text-center transition-all duration-300 hover:shadow-medium">
+                  <Card key={a.titre} className="text-center transition-shadow duration-200 hover:shadow-medium">
                     <CardContent className="pt-6">
                       <a.icone className={`mx-auto mb-4 h-8 w-8 ${a.couleur}`} aria-hidden="true" />
                       <h3 className="mb-2 font-semibold">

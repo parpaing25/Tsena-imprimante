@@ -151,7 +151,7 @@ const HeroSection = () => {
                           height={450}
                           loading="lazy"
                           decoding="async"
-                          className="mb-3 aspect-video h-auto w-[78%] max-w-[30rem] cursor-pointer rounded-3xl object-contain shadow-xl transition-all duration-300 hover:scale-105"
+                          className="ressort-photo mb-3 aspect-video h-auto w-[78%] max-w-[30rem] cursor-pointer rounded-3xl object-contain shadow-xl"
                           onClick={() => handleImageClick(product.imageUrl, product.name)}
                           onError={(e) => {
                             e.currentTarget.src = "/placeholder.svg";

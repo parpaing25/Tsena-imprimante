@@ -44,7 +44,8 @@ const Header = () => {
             </div>
             <div className="hidden sm:block min-w-0">
               {/* Audit 06/09/2026 : pas de <h1> dans l'en-tete — chaque page porte le sien. */}
-              <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300">
+              {/* 25/10/2026 : plus de grossissement au survol — ce nom n'est pas un lien. */}
+              <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
                 Tsena Imprimante
               </p>
               <p className="text-xs text-muted-foreground hidden sm:block">eto Madagasikara</p>
@@ -55,12 +56,15 @@ const Header = () => {
           {/* Menu complet à partir de 1280 px : à 1024-1279 px il poussait le bouton d'appel
               hors de l'écran (85 px de débordement mesuré à 1280 le 13/10/2026). En dessous,
               le menu à tiroir prend le relais. */}
+          {/* 25/10/2026 (MOUVEMENT.md R2, R3) : plus de `transition-all` ni d'ombre au survol, et plus
+              de fondu de 0,6 s des liens à chaque page — l'en-tête est au-dessus de la ligne de
+              flottaison, il s'affiche tel quel. */}
           <nav className="hidden xl:flex items-center gap-1 flex-1 justify-center">
             {navigation.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                className="text-base font-semibold transition-all duration-300 hover:text-primary whitespace-nowrap px-3 py-2 rounded-lg border border-border hover:border-primary hover:bg-accent/10 hover:shadow-lg hover-scale animate-fade-in relative overflow-hidden group"
+                className="text-base font-semibold transition-colors duration-200 hover:text-primary whitespace-nowrap px-3 py-2 rounded-lg border border-border hover:border-primary hover:bg-accent/10 relative overflow-hidden group"
               >
                 <span className="relative z-10">{item.name}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -115,8 +115,9 @@ const ContactSection = () => {
   return (
     <section id="contact" className="scroll-mt-16 bg-gradient-elegant py-6 sm:py-20">
       <div className="container mx-auto px-4">
-        <AnimatedSection animation="fade-in-scale" className="mb-4 text-center sm:mb-16">
-          <MessageCircle className="hidden h-16 w-16 sm:flex mx-auto text-primary mb-6 animate-bounce" />
+        <AnimatedSection className="mb-4 text-center sm:mb-16">
+          {/* 25/10/2026 : plus de rebond sans fin (animate-bounce, 1 s en boucle) — MOUVEMENT.md R10 */}
+          <MessageCircle className="hidden h-16 w-16 sm:flex mx-auto text-primary mb-6" aria-hidden="true" />
           <h2 className="text-xl sm:text-4xl font-bold text-primary mb-4">
             Contactez nos Experts
           </h2>
@@ -128,7 +129,7 @@ const ContactSection = () => {
 
         <div className="grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3">
           {/* Formulaire de Contact */}
-          <AnimatedSection animation="slide-in-left" className="order-2 lg:order-1 lg:col-span-2">
+          <AnimatedSection className="order-2 lg:order-1 lg:col-span-2">
             {!formOuvert && (
               <Button
                 variant="outline"
@@ -140,7 +141,7 @@ const ContactSection = () => {
               </Button>
             )}
             <div className={formOuvert ? "block" : "hidden sm:block"}>
-            <Card className="hover:shadow-glow transition-all duration-500">
+            <Card className="hover:shadow-glow transition-shadow duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <Send className="h-6 w-6 text-primary" />
@@ -183,7 +184,6 @@ const ContactSection = () => {
                         value={formData.name}
                         onChange={(e) => handleInputChange("name", e.target.value)}
                         placeholder="Votre nom et prénom"
-                        className="hover-scale"
                         required
                       />
                     </div>
@@ -195,7 +195,6 @@ const ContactSection = () => {
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
                         placeholder="033 XX XXX XX"
-                        className="hover-scale"
                       />
                     </div>
                   </div>
@@ -208,7 +207,6 @@ const ContactSection = () => {
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       placeholder="votre@email.com"
-                      className="hover-scale"
                     />
                   </div>
 
@@ -219,7 +217,6 @@ const ContactSection = () => {
                       value={formData.subject}
                       onChange={(e) => handleInputChange("subject", e.target.value)}
                       placeholder="Conseil d'achat, devis, support..."
-                      className="hover-scale"
                     />
                   </div>
 
@@ -231,7 +228,6 @@ const ContactSection = () => {
                       onChange={(e) => handleInputChange("message", e.target.value)}
                       placeholder="Décrivez votre besoin : type d'imprimante recherchée, budget, usage prévu..."
                       rows={6}
-                      className="hover-scale"
                       required
                     />
                   </div>
@@ -239,7 +235,7 @@ const ContactSection = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full btn-hero text-lg py-6 hover-scale"
+                    className="w-full btn-hero text-lg py-6"
                     size="lg"
                   >
                     {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
@@ -262,8 +258,8 @@ const ContactSection = () => {
 
                     <div className="order-1 space-y-3 sm:space-y-6 lg:order-2">
             {/* Contact Direct */}
-            <AnimatedSection animation="slide-in-right" delay={200}>
-              <Card className="hover:shadow-medium transition-all duration-300">
+            <AnimatedSection>
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl">
                     <Phone className="h-5 w-5 text-success" />
@@ -272,25 +268,25 @@ const ContactSection = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <Button onClick={handleCall} className="w-full btn-call hover-scale">
+                    <Button onClick={handleCall} className="w-full btn-call">
                       <Phone className="h-4 w-4 mr-2" />
                       {CONTACT.telephonePrincipal.affichage}
                     </Button>
-                    <Button onClick={handleWhatsApp} variant="outline" className="w-full hover-scale border-[#25d366] text-[#075e54]">
+                    <Button onClick={handleWhatsApp} variant="outline" className="w-full border-[#25d366] text-[#075e54]">
                       <MessageCircle className="h-4 w-4 mr-2" />
                       WhatsApp
                     </Button>
-                    <Button onClick={handleEmail} variant="outline" className="w-full hover-scale">
+                    <Button onClick={handleEmail} variant="outline" className="w-full">
                       <Mail className="h-4 w-4 mr-2" />
                       {CONTACT.email}
                     </Button>
-                    <Button onClick={handleMessenger} variant="outline" className="w-full hover-scale">
+                    <Button onClick={handleMessenger} variant="outline" className="w-full">
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Facebook Messenger
                     </Button>
                     <Button
                       onClick={handleFacebook}
-                      className="w-full bg-[#1565c0] text-white hover:bg-[#0d47a1] hover-scale"
+                      className="w-full bg-[#1565c0] text-white hover:bg-[#0d47a1]"
                     >
                       <Facebook className="h-4 w-4 mr-2" />
                       Page Facebook
@@ -301,8 +297,8 @@ const ContactSection = () => {
             </AnimatedSection>
 
             {/* Horaires */}
-            <AnimatedSection animation="slide-in-right" delay={400}>
-              <Card className="hover:shadow-medium transition-all duration-300">
+            <AnimatedSection>
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-accent" />
@@ -335,8 +331,8 @@ const ContactSection = () => {
             </AnimatedSection>
 
             {/* Zone de service — masquée sur téléphone : déjà dans le bandeau de confiance */}
-            <AnimatedSection animation="slide-in-right" delay={600} className="hidden sm:block">
-              <Card className="hover:shadow-medium transition-all duration-300">
+            <AnimatedSection className="hidden sm:block">
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -376,8 +372,8 @@ const ContactSection = () => {
             </AnimatedSection>
 
             {/* FAQ rapide — masquée sur téléphone : la page /faq est liée juste au-dessus */}
-            <AnimatedSection animation="slide-in-right" delay={800} className="hidden sm:block">
-              <Card className="hover:shadow-medium transition-all duration-300">
+            <AnimatedSection className="hidden sm:block">
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <HelpCircle className="h-5 w-5 text-accent" />
@@ -399,7 +395,7 @@ const ContactSection = () => {
                       <div className="text-muted-foreground">Constructeur, durée selon le modèle</div>
                     </div>
                   </div>
-                  <Button asChild variant="outline" className="w-full hover-scale mt-4" size="sm">
+                  <Button asChild variant="outline" className="w-full mt-4" size="sm">
                     <a href="/faq">
                       <HelpCircle className="h-4 w-4 mr-2" />
                       Voir toutes les FAQ

@@ -70,7 +70,7 @@ const Conseils = () => {
             <h2 className="text-3xl font-bold text-center mb-8">Choisir selon votre usage</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <Card className="hover:shadow-medium transition-all duration-300">
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <Home className="h-12 w-12 text-primary mb-4" />
                   <CardTitle>Usage Domestique</CardTitle>
@@ -101,7 +101,7 @@ const Conseils = () => {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-medium transition-all duration-300">
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <Users className="h-12 w-12 text-primary mb-4" />
                   <CardTitle>Usage Familial/Étudiant</CardTitle>
@@ -132,7 +132,7 @@ const Conseils = () => {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-medium transition-all duration-300">
+              <Card className="hover:shadow-medium transition-shadow duration-200">
                 <CardHeader>
                   <Building2 className="h-12 w-12 text-primary mb-4" />
                   <CardTitle>Usage Professionnel</CardTitle>

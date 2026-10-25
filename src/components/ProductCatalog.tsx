@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,8 +38,13 @@ const ProductCatalog = () => {
   const [hasWifi, setHasWifi] = useState<boolean | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [toutAfficher, setToutAfficher] = useState(false);
+  // 25/10/2026 (MOUVEMENT.md, décision d'Andry) : les cartes entrent, sortent et se déplacent
+  // quand on filtre, cherche ou affiche les autres modèles. Rien au premier rendu : AutoAnimate
+  // n'anime que les changements qui suivent son branchement. Il lit « réduire les animations »
+  // à l'initialisation et n'anime alors rien — ne jamais lui passer disrespectUserMotionPreference.
+  const [grille] = useAutoAnimate<HTMLDivElement>({ duration: 220 });
 
-  const brands = Array.from(new Set(products.map((p) => p.brand)));
+  const brands =Array.from(new Set(products.map((p) => p.brand)));
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -213,7 +219,7 @@ const ProductCatalog = () => {
         {/* Grille : 2 colonnes sur téléphone */}
         {filteredProducts.length > 0 ? (
           <>
-            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-6 md:grid-cols-3 xl:grid-cols-4">
+            <div ref={grille} className="relative mt-3 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-6 md:grid-cols-3 xl:grid-cols-4">
               {visibleProducts.map((product) => (
                 <ProductCard key={product.id} product={product} onRequestQuote={handleRequestQuote} />
               ))}

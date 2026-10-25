@@ -357,7 +357,7 @@ const ProformaQuoteForm = () => {
                     <Label>Type de livraison</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {deliveryOptions.map((option) => (
-                        <Card key={option.type} className={`cursor-pointer transition-all ${
+                        <Card key={option.type} className={`cursor-pointer transition-shadow ${
                           formData.deliveryType === option.type ? 'ring-2 ring-primary' : ''
                         }`}>
                           <CardContent className="p-4">
@@ -434,7 +434,7 @@ const ProformaQuoteForm = () => {
                       const selectedItem = formData.selectedProducts.find(p => p.product.id === product.id);
 
                       return (
-                        <Card key={product.id} className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-primary' : ''}`}>
+                        <Card key={product.id} className={`cursor-pointer transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}>
                           <CardContent className="p-4">
                             <div className="flex items-start space-x-3">
                               <Checkbox

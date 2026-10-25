@@ -1,53 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from "react";
+import { apparaitre } from "@/lib/apparition";
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
   className?: string;
-  animation?: 'fade-in' | 'slide-in-left' | 'slide-in-right' | 'slide-in-up' | 'bounce-in' | 'fade-in-scale';
-  delay?: number;
-  triggerOnce?: boolean;
 }
 
-const AnimatedSection = ({ 
-  children, 
-  className = '', 
-  animation = 'fade-in',
-  delay = 0,
-  triggerOnce = true 
-}: AnimatedSectionProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasAnimated, setHasAnimated] = useState(false);
+/**
+ * Bloc qui apparaît quand on l'atteint en défilant (MOUVEMENT.md, recette B).
+ *
+ * Le contenu est VISIBLE par défaut : sans JavaScript, dans le HTML pré-rendu, sous
+ * « réduire les animations », sans IntersectionObserver, et s'il est déjà dans l'écran au
+ * montage. Seul un bloc encore sous l'écran attend, puis entre en fondu montant de 0,5 s ;
+ * plusieurs blocs qui entrent ensemble se suivent de 60 ms (src/lib/apparition.ts).
+ *
+ * Avant le 25/10/2026, il partait de `opacity-0` posé par React : la section Contact entière
+ * était figée invisible dans dist/index.html.
+ */
+const AnimatedSection = ({ children, className = "" }: AnimatedSectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && (!triggerOnce || !hasAnimated)) {
-          setTimeout(() => {
-            setIsVisible(true);
-            if (triggerOnce) setHasAnimated(true);
-          }, delay);
-        } else if (!triggerOnce && !entry.isIntersecting) {
-          setIsVisible(false);
-        }
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [delay, triggerOnce, hasAnimated]);
-
-  const animationClass = isVisible ? `animate-${animation}` : 'opacity-0';
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    return apparaitre(ref.current);
+  }, []);
 
   return (
-    <div 
-      ref={ref} 
-      className={`transition-opacity duration-300 ${animationClass} ${className}`}
-    >
+    <div ref={ref} className={className || undefined}>
       {children}
     </div>
   );

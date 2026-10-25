@@ -73,6 +73,11 @@ All colors MUST be HSL for perfect theming.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
+    /* Mouvement (MOUVEMENT.md, recette A du 25/10/2026). Ressort « vif » : raideur 260,
+       amortissement 20, dépassement 8,3 %, posé en 0,61 s (mesuré dans Chromium par l'agent B). */
+    --sortie: cubic-bezier(.22, 1, .36, 1);
+    --ressort-vif: linear(0, 0.07, 0.233, 0.431, 0.624, 0.789, 0.915, 1.002, 1.054, 1.079, 1.083, 1.075, 1.06, 1.044, 1.028, 1.015, 1.005, 0.999, 0.995, 0.993, 0.993, 0.994, 0.995, 0.997, 1);
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -133,22 +138,23 @@ All colors MUST be HSL for perfect theming.
 
 /* Custom component styles using design system */
 @layer components {
-  /* CTA Button Variants */
+  /* CTA Button Variants — transition et survol : section « Mouvement » en fin de fichier
+     (25/10/2026 : `transition-all … hover:scale-105` remplacé par un ressort sur transform). */
   .btn-hero {
-    @apply bg-gradient-to-r from-primary to-accent text-white font-semibold px-8 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+    @apply bg-gradient-to-r from-primary to-accent text-white font-semibold px-8 py-4 rounded-lg shadow-lg hover:shadow-xl;
   }
-  
+
   .btn-call {
-    @apply !bg-success !text-success-foreground font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-300 hover:!bg-success/90 hover:shadow-lg hover:scale-105;
+    @apply !bg-success !text-success-foreground font-semibold px-6 py-3 rounded-lg shadow-md hover:!bg-success/90 hover:shadow-lg;
   }
-  
+
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground border-2 border-primary font-semibold px-6 py-3 rounded-lg hover:bg-primary hover:text-primary-foreground transition-all duration-300;
+    @apply bg-secondary text-secondary-foreground border-2 border-primary font-semibold px-6 py-3 rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200;
   }
 
   /* Product Cards */
   .product-card {
-    @apply bg-card rounded-xl shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border border-border/50;
+    @apply bg-card rounded-xl shadow-soft hover:shadow-medium border border-border/50;
   }
   
   /* Gradient Backgrounds */
@@ -232,12 +238,15 @@ All colors MUST be HSL for perfect theming.
   .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
   /* Utilisée par Header.tsx et AnimatedSection depuis toujours, mais jamais définie
      (audit du 13/10/2026) : les éléments restaient sans animation, ou à opacity 0. */
-  .animate-fade-in { animation: fadeIn 0.6s ease-out both; }
+  /* Remplissage `backwards`, jamais `both` (MOUVEMENT.md R12, R17) : à la fin, le style normal
+     revient, sans `transform: translateY(0)` résiduel qui ferait de l'élément le bloc conteneur
+     de ses descendants `position: fixed`. Rendu identique pendant et après l'animation. */
+  .animate-fade-in { animation: fadeIn 0.6s ease-out backwards; }
 
   /* En-tête de page : le titre monte, le sous-titre suit, le fond glisse doucement. */
-  .entete-titre { animation: slideInUp 0.6s ease-out both; }
-  .entete-sous { animation: slideInUp 0.6s ease-out 0.12s both; }
-  .entete-fil { animation: fadeIn 0.6s ease-out 0.24s both; }
+  .entete-titre { animation: slideInUp 0.6s ease-out backwards; }
+  .entete-sous { animation: slideInUp 0.6s ease-out 0.12s backwards; }
+  .entete-fil { animation: fadeIn 0.6s ease-out 0.24s backwards; }
   .entete-halo { animation: haloDerive 18s ease-in-out infinite alternate; }
 }
 
@@ -285,4 +294,90 @@ All colors MUST be HSL for perfect theming.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ── Mouvement (MOUVEMENT.md, 25/10/2026) ─────────────────────────────────────────────────
+   Hors de tout @layer, exprès : ces règles passent APRÈS les utilitaires Tailwind. Le bouton
+   shadcn porte `transition-colors` (utilitaire, plus loin dans la feuille que @layer components) :
+   il écrasait la `transition-all` de .btn-call, et le `hover:scale-105` sautait sans transition. */
+
+/* Apparition au défilement (recette B, src/lib/apparition.ts). L'état caché n'existe que sous
+   html.apparitions, classe posée par le JavaScript et jamais présente dans le HTML pré-rendu ;
+   à l'écran seulement (une impression montre tout) ; jamais sous « réduire les animations ».
+   Animation et non transition (R17) : remplissage `backwards`, rien ne reste après. */
+@keyframes apparait {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  html.apparitions [data-apparition="attente"] {
+    opacity: 0;
+  }
+
+  [data-apparition="entre"] {
+    animation: apparait 0.5s var(--sortie) backwards;
+    animation-delay: calc(var(--rang, 0) * 60ms);
+  }
+}
+
+/* Ressorts (recette A) : sur `transform` seul (R2), jamais `transition: all`. Le survol ne vaut
+   que pour une souris (un écran tactile garde l'état :hover collé après un appui) ; l'appui,
+   lui, répond partout et vite. Sans linear(), repli sur une sortie douce. */
+.btn-hero,
+.btn-call,
+.ressort-bouton {
+  transition: transform 0.35s var(--sortie), background-color 0.15s ease-out, color 0.15s ease-out, box-shadow 0.2s ease-out;
+}
+
+.product-card,
+.ressort-carte {
+  transition: transform 0.35s var(--sortie), box-shadow 0.2s ease-out;
+}
+
+.ressort-photo {
+  transition: transform 0.35s var(--sortie);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .btn-hero,
+    .btn-call,
+    .ressort-bouton {
+      transition: transform 0.61s var(--ressort-vif), background-color 0.15s ease-out, color 0.15s ease-out, box-shadow 0.2s ease-out;
+    }
+
+    .product-card,
+    .ressort-carte {
+      transition: transform 0.61s var(--ressort-vif), box-shadow 0.2s ease-out;
+    }
+
+    .ressort-photo {
+      transition: transform 0.61s var(--ressort-vif);
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-hero:hover,
+  .btn-call:hover,
+  .ressort-bouton:hover {
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .product-card:hover,
+  .ressort-carte:hover {
+    transform: translateY(-3px) scale(1.015);
+  }
+
+  .ressort-photo:hover {
+    transform: scale(1.02);
+  }
+}
+
+/* Appui : après le survol dans la feuille, pour l'emporter sur lui (même spécificité). */
+.btn-hero:active,
+.btn-call:active,
+.ressort-bouton:active {
+  transform: scale(0.97);
+  transition-duration: 0.12s;
 }
